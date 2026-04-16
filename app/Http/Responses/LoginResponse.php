@@ -1,58 +1,30 @@
 <?php
 
-namespace App\Models;
+namespace App\Http\Responses;
 
-use App\Enums\UserRole;
-use App\Enums\UserStatus;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use App\Services\CartService;
+use Illuminate\Http\JsonResponse;
+use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
 
-class User extends Authenticatable
+class LoginResponse implements LoginResponseContract
 {
-    use HasFactory;
-    use Notifiable;
-    use SoftDeletes;
+    public function __construct(
+        private CartService $cartService,
+    ) {}
 
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-        'status',
-    ];
-
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'status' => UserStatus::class,
-        'role' => UserRole::class,
-    ];
-
-    public function orders(): HasMany
+    public function toResponse($request)
     {
-        return $this->hasMany(Order::class);
-    }
+        $this->cartService->mergeGuestCartIntoUserCart();
 
-    public function isActive(): bool
-    {
-        return $this->status === UserStatus::Active;
-    }
+        $user = $request->user();
+        $fallback = $user && $user->isAdmin()
+            ? route('admin.dashboard')
+            : route('customer.dashboard');
 
-    public function isBlocked(): bool
-    {
-        return $this->status === UserStatus::Blocked;
-    }
+        if ($request->wantsJson()) {
+            return new JsonResponse(['redirect' => $fallback], 200);
+        }
 
-    public function isAdmin(): bool
-    {
-        return $this->role === UserRole::Admin;
-    }
-
-    public function isCustomer(): bool
-    {
-        return $this->role === UserRole::Customer;
+        return redirect()->intended($fallback);
     }
 }

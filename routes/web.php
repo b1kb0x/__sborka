@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ProductAttributeController as AdminProductAttribu
 use App\Http\Controllers\Admin\ProductAttributeOptionController as AdminProductAttributeOptionController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CustomerCabinetController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Auth;
@@ -69,7 +70,11 @@ Route::get('/checkout/success', [CartController::class, 'success'])->name('check
 Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 
 Route::middleware(['auth', 'active.user', 'customer'])->group(function () {
-    Route::get('/cabinet', function () {
-        return view('customer.dashboard', ['user' => Auth::user()]);
-    })->name('customer.dashboard');
+    Route::prefix('cabinet')->name('customer.')->group(function () {
+        Route::get('/', [CustomerCabinetController::class, 'dashboard'])->name('dashboard');
+        Route::get('/orders', [CustomerCabinetController::class, 'orders'])->name('orders.index');
+        Route::get('/orders/{order}', [CustomerCabinetController::class, 'showOrder'])->name('orders.show');
+        Route::get('/profile', [CustomerCabinetController::class, 'editProfile'])->name('profile.edit');
+        Route::put('/profile', [CustomerCabinetController::class, 'updateProfile'])->name('profile.update');
+    });
 });

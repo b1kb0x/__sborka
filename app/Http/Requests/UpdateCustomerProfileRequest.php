@@ -27,7 +27,7 @@ class UpdateCustomerProfileRequest extends FormRequest
             ],
             'region' => ['required', 'string', 'max:255'],
             'city' => ['required', 'string', 'max:255'],
-            'address' => ['required', 'string', 'max:255'],
+            'address' => ['required', 'string', 'max:1000'],
         ];
     }
 }

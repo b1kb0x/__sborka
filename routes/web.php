@@ -46,8 +46,6 @@ Route::middleware(['auth', 'active.user', 'admin'])->group(function () {
         Route::get('customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
         Route::get('customers/{customer}/edit', [AdminCustomerController::class, 'edit'])->name('customers.edit');
         Route::put('customers/{customer}', [AdminCustomerController::class, 'update'])->name('customers.update');
-        Route::delete('customers/{customer}', [AdminCustomerController::class, 'destroy'])->name('customers.destroy');
-        Route::post('customers/{customer}/restore', [AdminCustomerController::class, 'restore'])->name('customers.restore');
 
         Route::prefix('product-attributes/{productAttribute}/options')
             ->name('product-attributes.options.')

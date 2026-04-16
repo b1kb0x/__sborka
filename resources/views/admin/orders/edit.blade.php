@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container">
-        <h1>Редактировать заказ #{{ $order->id }}</h1>
+        <h1>Edit order #{{ $order->id }}</h1>
 
         @if(session('success'))
             <div style="margin-bottom:15px; padding:10px; border:1px solid green;">
@@ -10,12 +10,25 @@
             </div>
         @endif
 
+        <div style="margin-bottom:20px; padding:15px; border:1px solid #ddd;">
+            <h2 style="margin-top:0;">Customer details</h2>
+            <p><strong>First name:</strong> {{ $order->first_name }}</p>
+            <p><strong>Last name:</strong> {{ $order->last_name }}</p>
+            <p><strong>Phone:</strong> {{ $order->phone }}</p>
+            <p><strong>Email:</strong> {{ $order->email }}</p>
+            <p><strong>Customer status:</strong> {{ $order->customer_status }}</p>
+            <p><strong>Region:</strong> {{ $order->region }}</p>
+            <p><strong>City:</strong> {{ $order->city }}</p>
+            <p><strong>Address:</strong> {{ $order->address }}</p>
+            <p><strong>Comment:</strong> {{ $order->comment ?: '�' }}</p>
+        </div>
+
         <form action="{{ route('admin.orders.update', $order) }}" method="POST">
             @csrf
             @method('PUT')
 
             <div style="margin-bottom:15px;">
-                <label for="status">Статус заказа</label><br>
+                <label for="status">Order status</label><br>
                 <select name="status" id="status" style="width:100%;">
                     @foreach($orderStatuses as $status)
                         <option
@@ -32,7 +45,7 @@
             </div>
 
             <div style="margin-bottom:15px;">
-                <label for="fulfillment_status">Статус выполнения</label><br>
+                <label for="fulfillment_status">Fulfillment status</label><br>
                 <select name="fulfillment_status" id="fulfillment_status" style="width:100%;">
                     @foreach($fulfillmentStatuses as $status)
                         <option
@@ -49,7 +62,7 @@
             </div>
 
             <div style="margin-bottom:15px;">
-                <label for="carrier_name">Транспортная компания</label><br>
+                <label for="carrier_name">Carrier</label><br>
                 <input
                     type="text"
                     name="carrier_name"
@@ -63,7 +76,7 @@
             </div>
 
             <div style="margin-bottom:15px;">
-                <label for="tracking_number">Трек-номер / ТТН</label><br>
+                <label for="tracking_number">Tracking number</label><br>
                 <input
                     type="text"
                     name="tracking_number"
@@ -76,23 +89,23 @@
                 @enderror
             </div>
 
-            <button type="submit">Сохранить</button>
+            <button type="submit">Save</button>
         </form>
 
         <hr style="margin:30px 0;">
 
-        <h2>Позиции заказа</h2>
+        <h2>Order items</h2>
 
         @if($order->items->isEmpty())
-            <p>Позиции отсутствуют.</p>
+            <p>No items found.</p>
         @else
             <table border="1" cellpadding="10" cellspacing="0" width="100%">
                 <thead>
                 <tr>
-                    <th>Товар</th>
-                    <th>Количество</th>
-                    <th>Цена</th>
-                    <th>Помол</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Grind</th>
                 </tr>
                 </thead>
                 <tbody>

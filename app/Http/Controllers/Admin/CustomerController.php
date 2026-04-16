@@ -19,10 +19,6 @@ class CustomerController extends Controller
             ->withCount('orders')
             ->latest();
 
-        if ($request->boolean('with_trashed')) {
-            $query->withTrashed();
-        }
-
         if ($request->filled('status')) {
             $query->where('status', $request->string('status')->value());
         }
@@ -43,7 +39,6 @@ class CustomerController extends Controller
             'filters' => [
                 'search' => $request->string('search')->value(),
                 'status' => $request->string('status')->value(),
-                'with_trashed' => $request->boolean('with_trashed'),
             ],
         ]);
     }
@@ -79,29 +74,5 @@ class CustomerController extends Controller
         return redirect()
             ->route('admin.customers.index')
             ->with('success', 'Покупатель обновлён.');
-    }
-
-    public function destroy(User $customer): RedirectResponse
-    {
-        abort_unless($customer->role === UserRole::Customer, 404);
-
-        $customer->delete();
-
-        return redirect()
-            ->route('admin.customers.index')
-            ->with('success', 'Покупатель удалён.');
-    }
-
-    public function restore(int $customer): RedirectResponse
-    {
-        $customerModel = User::onlyTrashed()
-            ->where('role', 'customer')
-            ->findOrFail($customer);
-
-        $customerModel->restore();
-
-        return redirect()
-            ->route('admin.customers.index')
-            ->with('success', 'Покупатель восстановлен.');
     }
 }

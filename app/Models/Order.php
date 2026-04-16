@@ -53,4 +53,22 @@ class Order extends Model
     {
         return $this->fulfillment_status?->label() ?? '';
     }
+
+    public function getCustomerStatusAttribute(): string
+    {
+        if (! $this->user_id) {
+            return 'guest';
+        }
+
+        $user = $this->relationLoaded('user')
+            ? $this->getRelation('user')
+            : $this->user()->first();
+
+        if (! $user) {
+            return 'guest';
+        }
+
+        return $user->status?->value
+            ?? (is_string($user->status) ? $user->status : 'guest');
+    }
 }

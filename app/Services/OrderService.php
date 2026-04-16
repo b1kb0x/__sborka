@@ -57,6 +57,8 @@ class OrderService
 
     public function createFromCart(array $checkoutData): CheckoutResult
     {
+        $checkoutData['email'] = $this->normalizeEmail($checkoutData['email'] ?? '');
+
         $errors = $this->cartService->validateForCheckout();
 
         if (! empty($errors)) {
@@ -73,15 +75,17 @@ class OrderService
             $authenticatedUser = Auth::user();
             $accountCreated = false;
             $shouldAuthenticate = false;
+            $orderUser = $authenticatedUser;
             $orderUserId = $authenticatedUser?->id;
 
             if (! $authenticatedUser) {
-                $existingUser = User::query()
-                    ->where('email', $checkoutData['email'])
-                    ->first();
+                $existingUser = $this->findUserByEmail($checkoutData['email']);
 
-                if (! $existingUser) {
-                    $authenticatedUser = User::query()->create([
+                if ($existingUser) {
+                    $orderUser = $existingUser;
+                    $orderUserId = $existingUser->id;
+                } else {
+                    $orderUser = User::query()->create([
                         'name' => trim($checkoutData['first_name'].' '.$checkoutData['last_name']),
                         'first_name' => $checkoutData['first_name'],
                         'last_name' => $checkoutData['last_name'],
@@ -95,7 +99,7 @@ class OrderService
                         'status' => UserStatus::Active,
                     ]);
 
-                    $orderUserId = $authenticatedUser->id;
+                    $orderUserId = $orderUser->id;
                     $accountCreated = true;
                     $shouldAuthenticate = true;
                 }
@@ -150,7 +154,7 @@ class OrderService
 
             return new CheckoutResult(
                 order: $order,
-                authenticatedUser: $shouldAuthenticate ? $authenticatedUser : Auth::user(),
+                authenticatedUser: $shouldAuthenticate ? $orderUser : Auth::user(),
                 accountCreated: $accountCreated,
                 resetLinkSent: false,
             );
@@ -171,6 +175,18 @@ class OrderService
         }
 
         return $result;
+    }
+
+    protected function findUserByEmail(string $email): ?User
+    {
+        return User::query()
+            ->whereRaw('LOWER(email) = ?', [Str::lower($email)])
+            ->first();
+    }
+
+    protected function normalizeEmail(string $email): string
+    {
+        return Str::lower(trim($email));
     }
 
     protected function splitName(?string $name): array

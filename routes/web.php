@@ -64,10 +64,9 @@ Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/remove/{rowId}', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/update/{rowId}', [CartController::class, 'updateQty'])->name('cart.update');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
-
-Route::middleware(['auth'])->group(function () {
-    Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
-});
+Route::get('/checkout', [CartController::class, 'showCheckout'])->name('checkout.create');
+Route::get('/checkout/success', [CartController::class, 'success'])->name('checkout.success');
+Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 
 Route::middleware(['auth', 'active.user', 'customer'])->group(function () {
     Route::get('/cabinet', function () {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\GrindType;
+use App\Http\Requests\CheckoutRequest;
 use App\Services\CartService;
 use App\Services\OrderService;
 use DomainException;
@@ -90,18 +91,61 @@ class CartController extends Controller
             ->with('success', 'Корзина очищена.');
     }
 
-    public function checkout(): RedirectResponse
+    public function showCheckout(Request $request): View|RedirectResponse
+    {
+        $messages = $this->cartService->refresh();
+        $cart = $this->cartService->cart();
+
+        if (count($cart->items) === 0) {
+            return redirect()
+                ->route('cart.index')
+                ->with('error', 'Cart is empty.');
+        }
+
+        return view('checkout.create', [
+            'cart' => $cart,
+            'messages' => $messages,
+            'checkoutData' => $this->orderService->defaultCheckoutData($request->user()),
+        ]);
+    }
+
+    public function checkout(CheckoutRequest $request): RedirectResponse
     {
         try {
-            $order = $this->orderService->createFromCart();
+            $result = $this->orderService->createFromCart($request->validated());
 
             return redirect()
-                ->route('orders.show', $order)
+                ->route('checkout.success')
+                ->with('checkout_success', [
+                    'order_id' => $result->order->id,
+                    'email' => $result->order->email,
+                    'account_created' => $result->accountCreated,
+                    'reset_link_sent' => $result->resetLinkSent,
+                    'authenticated' => (bool) $result->authenticatedUser,
+                ])
+                ->with('success', 'Order placed.');
+
+            return redirect()
+                ->route('orders.show', $result->order)
                 ->with('success', 'Заказ оформлен.');
         } catch (DomainException $e) {
             return redirect()
-                ->route('cart.index')
+                ->route('checkout.create')
+                ->withInput()
                 ->with('error', $e->getMessage());
         }
+    }
+
+    public function success(Request $request): View|RedirectResponse
+    {
+        $checkoutSuccess = $request->session()->get('checkout_success');
+
+        if (! $checkoutSuccess) {
+            return redirect()->route('cart.index');
+        }
+
+        return view('checkout.success', [
+            'checkoutSuccess' => $checkoutSuccess,
+        ]);
     }
 }

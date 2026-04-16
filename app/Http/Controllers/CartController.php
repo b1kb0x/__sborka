@@ -93,6 +93,12 @@ class CartController extends Controller
 
     public function showCheckout(Request $request): View|RedirectResponse
     {
+        if ($request->user()?->isAdmin()) {
+            return redirect()
+                ->route('cart.index')
+                ->with('error', 'Admins cannot place orders.');
+        }
+
         $messages = $this->cartService->refresh();
         $cart = $this->cartService->cart();
 

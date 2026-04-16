@@ -68,10 +68,12 @@
             <p>Общее количество: {{ $cart->count }}</p>
             <p>Итого: {{ $cart->subtotal }}</p>
 
-            <p style="margin-top:20px;">
+            @if(!auth()->check() || !auth()->user()->isAdmin())
+                <p style="margin-top:20px;">
                 <a href="{{ route('checkout.create') }}">Proceed to checkout</a>
                 <button type="submit">Оформить заказ</button>
             </p>
+            @endif
 
             <form action="{{ route('cart.clear') }}" method="POST" style="margin-top:10px;">
                 @csrf

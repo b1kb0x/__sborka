@@ -122,6 +122,14 @@
     @error('is_active')
     <div style="color:red;">{{ $message }}</div>
     @enderror
+    <form action="{{ route('admin.products.image.store', $product) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+
+        <input type="file" name="image" required>
+        <input type="text" name="alt" value="{{ old('alt', $product->primaryImage?->alt) }}" placeholder="Alt текст">
+
+        <button type="submit">Загрузить фото</button>
+    </form>
 </div>
 
 @if($attributes->isNotEmpty())

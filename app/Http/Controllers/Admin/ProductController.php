@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateProductRequest;
 use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\ProductAttributeValue;
+use App\Services\ProductImageService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -241,5 +242,50 @@ class ProductController extends Controller
             'value_number' => null,
             'value_boolean' => null,
         ];
+    }
+
+    public function uploadImage(Request $request, Product $product, ProductImageService $service): RedirectResponse
+    {
+        $validated = $request->validate([
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'alt' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $service->uploadPrimary(
+            $product,
+            $validated['image'],
+            $validated['alt'] ?? null,
+        );
+
+        return back()->with('success', 'Фото товара сохранено.');
+    }
+
+    public function replaceImage(Request $request, Product $product, ProductImageService $service): RedirectResponse
+    {
+        $validated = $request->validate([
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'alt' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $image = $product->primaryImage()->firstOrFail();
+
+        $service->replace(
+            $image,
+            $validated['image'],
+            $validated['alt'] ?? null,
+        );
+
+        return back()->with('success', 'Фото товара заменено.');
+    }
+
+    public function deleteImage(Product $product, ProductImageService $service): RedirectResponse
+    {
+        $image = $product->primaryImage()->first();
+
+        if ($image) {
+            $service->delete($image);
+        }
+
+        return back()->with('success', 'Фото товара удалено.');
     }
 }

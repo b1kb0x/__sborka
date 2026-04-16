@@ -52,6 +52,10 @@ Route::middleware(['auth', 'active.user', 'admin'])->group(function () {
                 Route::put('/{option}', [AdminProductAttributeOptionController::class, 'update'])->name('update');
                 Route::delete('/{option}', [AdminProductAttributeOptionController::class, 'destroy'])->name('destroy');
             });
+
+        Route::post('/admin/products/{product}/image', [ProductController::class, 'uploadImage'])->name('admin.products.image.store');
+        Route::put('/admin/products/{product}/image', [ProductController::class, 'replaceImage'])->name('admin.products.image.replace');
+        Route::delete('/admin/products/{product}/image', [ProductController::class, 'deleteImage'])->name('admin.products.image.destroy');
     });
 });
 

@@ -33,7 +33,7 @@
             <a href="{{ route('products.index') }}">Continue shopping</a>
             @if(!empty($checkoutSuccess['authenticated']))
                 <span style="margin:0 8px;">|</span>
-                <a href="{{ route('orders.show', $checkoutSuccess['order_id']) }}">View order</a>
+                <a href="{{ route('customer.orders.show', $checkoutSuccess['order_id']) }}">View order</a>
             @else
                 <span style="margin:0 8px;">|</span>
                 <a href="{{ url('/login') }}">Sign in</a>

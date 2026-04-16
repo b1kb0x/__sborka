@@ -12,7 +12,7 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('order_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('product_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('product_id')->nullable()->constrained()->nullOnDelete();
 
             $table->string('product_title');
             $table->unsignedInteger('unit_price');

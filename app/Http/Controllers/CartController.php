@@ -51,7 +51,7 @@ class CartController extends Controller
 
         return redirect()
             ->route('cart.index')
-            ->with('success', 'Товар добавлен в корзину.');
+            ->with('success', 'РўРѕРІР°СЂ РґРѕР±Р°РІР»РµРЅ РІ РєРѕСЂР·РёРЅСѓ.');
     }
 
     public function updateQty(Request $request, string $rowId): RedirectResponse
@@ -70,7 +70,7 @@ class CartController extends Controller
 
         return redirect()
             ->route('cart.index')
-            ->with('success', 'Количество обновлено.');
+            ->with('success', 'РљРѕР»РёС‡РµСЃС‚РІРѕ РѕР±РЅРѕРІР»РµРЅРѕ.');
     }
 
     public function remove(string $rowId): RedirectResponse
@@ -79,7 +79,7 @@ class CartController extends Controller
 
         return redirect()
             ->route('cart.index')
-            ->with('success', 'Товар удалён из корзины.');
+            ->with('success', 'РўРѕРІР°СЂ СѓРґР°Р»С‘РЅ РёР· РєРѕСЂР·РёРЅС‹.');
     }
 
     public function clear(): RedirectResponse
@@ -88,7 +88,7 @@ class CartController extends Controller
 
         return redirect()
             ->route('cart.index')
-            ->with('success', 'Корзина очищена.');
+            ->with('success', 'РљРѕСЂР·РёРЅР° РѕС‡РёС‰РµРЅР°.');
     }
 
     public function showCheckout(Request $request): View|RedirectResponse
@@ -131,9 +131,6 @@ class CartController extends Controller
                 ])
                 ->with('success', 'Order placed.');
 
-            return redirect()
-                ->route('orders.show', $result->order)
-                ->with('success', 'Заказ оформлен.');
         } catch (DomainException $e) {
             return redirect()
                 ->route('checkout.create')

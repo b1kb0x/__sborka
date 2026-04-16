@@ -3,31 +3,27 @@
 namespace App\Http\Controllers;
 
 use App\Models\Order;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\View\View;
 
 class OrderController extends Controller
 {
-    public function index(): View
+    public function index(): RedirectResponse
     {
-        $orders = Order::query()
-            ->where('user_id', Auth::id())
-            ->latest()
-            ->get();
+        abort_unless(auth()->user()?->isCustomer(), 403);
 
-        return view('orders.index', [
-            'orders' => $orders,
-        ]);
+        return redirect()->route('customer.orders.index');
     }
 
-    public function show(Order $order): View
+    public function show(Order $order): RedirectResponse
     {
-        abort_unless(auth()->check() && $order->user_id === Auth::id(), 403);
+        abort_unless(
+            auth()->check()
+            && auth()->user()?->isCustomer()
+            && $order->user_id === Auth::id(),
+            403
+        );
 
-        $order->load(['items.product']);
-
-        return view('orders.show', [
-            'order' => $order,
-        ]);
+        return redirect()->route('customer.orders.show', $order);
     }
 }

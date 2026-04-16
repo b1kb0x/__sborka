@@ -20,7 +20,13 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
 
 Route::middleware(['auth', 'active.user'])->group(function () {
-    Route::view('/account/profile', 'account.profile')->name('account.profile');
+    Route::get('/account/profile', function () {
+        if (auth()->user()?->isCustomer()) {
+            return redirect()->route('customer.profile.edit');
+        }
+
+        return view('account.profile');
+    })->name('account.profile');
 
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');

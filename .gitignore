@@ -1,0 +1,62 @@
+# Сначала игнорируем всё
+*
+
+# Разрешаем служебные git-файлы
+!.gitignore
+!README.md
+
+# Разрешаем только нужные каталоги верхнего уровня
+!app/
+!routes/
+!resources/
+!database/
+!composer.json
+!package.json
+
+# app
+!app/**
+!app/Data/
+!app/Data/**
+!app/Enums/
+!app/Enums/**
+!app/Http/
+!app/Http/**
+!app/Models/
+!app/Models/**
+!app/Repositories/
+!app/Repositories/**
+!app/Services/
+!app/Services/**
+
+# routes
+!routes/**
+# Если хотите только web.php, можно так:
+#!routes/web.php
+
+# resources
+!resources/views/
+!resources/views/**
+
+# database
+!database/migrations/
+!database/migrations/**
+!database/factories/
+!database/factories/**
+!database/seeders/
+!database/seeders/**
+
+# Дополнительная защита от лишнего
+vendor/
+node_modules/
+public/
+storage/
+bootstrap/
+config/
+tests/
+.env
+.env.*
+composer.lock
+package-lock.json
+.idea/
+.vscode/
+.phpunit.result.cache

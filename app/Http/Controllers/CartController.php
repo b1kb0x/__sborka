@@ -36,11 +36,17 @@ class CartController extends Controller
             'grind_type' => ['required', new Enum(GrindType::class)],
         ]);
 
-        $this->cartService->add(
-            productId: (int) $validated['product_id'],
-            grindType: GrindType::from($validated['grind_type']),
-            qty: (int) ($validated['qty'] ?? 1),
-        );
+        try {
+            $this->cartService->add(
+                productId: (int) $validated['product_id'],
+                grindType: GrindType::from($validated['grind_type']),
+                qty: (int) ($validated['qty'] ?? 1),
+            );
+        } catch (DomainException $e) {
+            return back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
 
         return redirect()
             ->route('cart.index')
@@ -53,7 +59,13 @@ class CartController extends Controller
             'qty' => ['required', 'integer', 'min:1'],
         ]);
 
-        $this->cartService->updateQty($rowId, (int) $validated['qty']);
+        try {
+            $this->cartService->updateQty($rowId, (int) $validated['qty']);
+        } catch (DomainException $e) {
+            return redirect()
+                ->route('cart.index')
+                ->with('error', $e->getMessage());
+        }
 
         return redirect()
             ->route('cart.index')
@@ -80,7 +92,6 @@ class CartController extends Controller
 
     public function checkout(): RedirectResponse
     {
-
         try {
             $order = $this->orderService->createFromCart();
 

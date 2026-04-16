@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class OrderController extends Controller
@@ -38,14 +39,22 @@ class OrderController extends Controller
     public function update(Request $request, Order $order): RedirectResponse
     {
         $validated = $request->validate([
-            'status' => ['required', 'string'],
-            'fulfillment_status' => ['required', 'string'],
+            'status' => ['required', Rule::enum(OrderStatus::class)],
+            'fulfillment_status' => ['required', Rule::enum(FulfillmentStatus::class)],
             'carrier_name' => ['nullable', 'string', 'max:255'],
             'tracking_number' => ['nullable', 'string', 'max:255'],
         ]);
 
         $orderStatus = OrderStatus::from($validated['status']);
         $fulfillmentStatus = FulfillmentStatus::from($validated['fulfillment_status']);
+
+        if ($order->status !== $orderStatus && ! $order->status->canTransitionTo($orderStatus)) {
+            return back()
+                ->withInput()
+                ->withErrors([
+                    'status' => 'Недопустимый переход статуса заказа.',
+                ]);
+        }
 
         $order->status = $orderStatus;
         $order->fulfillment_status = $fulfillmentStatus;

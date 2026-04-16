@@ -10,10 +10,10 @@
             <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:20px;">
                 @foreach($products as $product)
                     <article style="border:1px solid #ddd; padding:16px;">
-                        @if($product->image_path)
+                        @if($product->primaryImage)
                             <div style="margin-bottom:12px;">
-                                <img src="{{ asset($product->image_path) }}"
-                                     alt="{{ $product->title }}"
+                                <img src="{{ $product->primaryImage->thumbnail_url }}"
+                                     alt="{{ $product->primaryImage->alt ?? $product->title }}"
                                      style="max-width:100%; height:auto;">
                             </div>
                         @endif

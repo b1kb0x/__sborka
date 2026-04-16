@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\Encoders\WebpEncoder;
 use Throwable;
 
 class ProductImageService
@@ -43,8 +44,12 @@ class ProductImageService
 
     public function replace(ProductImage $image, UploadedFile $file, ?string $alt = null): ProductImage
     {
-        $oldFileName = $image->file_name;
+        $oldPaths = $this->pathsForStoredFile(
+            $image->product_id,
+            (string) ($image->getOriginal('file_name') ?: $image->file_name)
+        );
         $newFileName = $this->generateFileName($image->product, $file);
+        $newPaths = $this->pathsForStoredFile($image->product_id, $newFileName);
 
         $this->storeVariants($image->product, $file, $newFileName);
 
@@ -54,41 +59,68 @@ class ProductImageService
                 'alt' => $alt,
             ]);
 
-            $this->deleteFilesByName($image->product_id, $oldFileName);
+            $this->deletePaths($oldPaths);
 
             return $image->fresh();
         } catch (Throwable $e) {
-            $this->deleteFilesByName($image->product_id, $newFileName);
+            $this->deletePaths($newPaths);
             throw $e;
         }
     }
 
     public function delete(ProductImage $image): void
     {
+        $paths = $this->pathsForStoredFile(
+            $image->product_id,
+            (string) ($image->getOriginal('file_name') ?: $image->file_name)
+        );
+
         DB::transaction(function () use ($image) {
-            $this->deleteFilesByName($image->product_id, $image->file_name);
             $image->delete();
         });
+
+        $this->deletePaths($paths);
     }
 
-    public function deleteForProduct(Product $product): void
+    public function pathsForProduct(Product $product): array
     {
-        $product->images()->each(fn (ProductImage $image) => $this->delete($image));
+        $images = $product->relationLoaded('images')
+            ? $product->images
+            : $product->images()->get();
+
+        return $images
+            ->flatMap(fn (ProductImage $image) => $this->pathsForStoredFile(
+                $image->product_id,
+                (string) ($image->getOriginal('file_name') ?: $image->file_name)
+            ))
+            ->values()
+            ->all();
+    }
+
+    public function deletePaths(array $paths): void
+    {
+        $disk = Storage::disk('public');
+
+        foreach (array_unique($paths) as $path) {
+            if ($disk->exists($path)) {
+                $disk->delete($path);
+            }
+        }
     }
 
     protected function storeVariants(Product $product, UploadedFile $file, string $fileName): void
     {
         $disk = Storage::disk('public');
         $directory = 'products';
-        $source = $this->images->read($file->getRealPath());
+        $source = $this->images->decode($file->getRealPath());
 
         $thumbnail = clone $source;
         $preview = clone $source;
         $original = clone $source;
 
-        $thumbnail->cover(300, 300)->toWebp(82);
-        $preview->cover(800, 800)->toWebp(84);
-        $original->scaleDown(width: 1600, height: 1600)->toWebp(86);
+        $thumbnail = $thumbnail->cover(300, 300)->encode(new WebpEncoder(82));
+        $preview = $preview->cover(800, 800)->encode(new WebpEncoder(84));
+        $original = $original->scaleDown(width: 1600, height: 1600)->encode(new WebpEncoder(86));
 
         $disk->put(
             "{$directory}/{$product->id}_thumbnail_{$fileName}",
@@ -106,19 +138,21 @@ class ProductImageService
         );
     }
 
-    protected function deleteFilesByName(int $productId, string $fileName): void
+    protected function pathsForImage(ProductImage $image): array
     {
-        $disk = Storage::disk('public');
+        return $this->pathsForStoredFile(
+            $image->product_id,
+            (string) ($image->getOriginal('file_name') ?: $image->file_name)
+        );
+    }
 
-        foreach ([
-                     "products/{$productId}_thumbnail_{$fileName}",
-                     "products/{$productId}_preview_{$fileName}",
-                     "products/{$productId}_{$fileName}",
-                 ] as $path) {
-            if ($disk->exists($path)) {
-                $disk->delete($path);
-            }
-        }
+    protected function pathsForStoredFile(int $productId, string $fileName): array
+    {
+        return [
+            "products/{$productId}_thumbnail_{$fileName}",
+            "products/{$productId}_preview_{$fileName}",
+            "products/{$productId}_{$fileName}",
+        ];
     }
 
     protected function generateFileName(Product $product, UploadedFile $file): string

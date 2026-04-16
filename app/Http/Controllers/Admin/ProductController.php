@@ -10,6 +10,7 @@ use App\Models\ProductAttribute;
 use App\Models\ProductAttributeValue;
 use App\Services\ProductImageService;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -66,6 +67,7 @@ class ProductController extends Controller
         $product->load([
             'attributeValues.attribute',
             'attributeValues.option',
+            'primaryImage',
         ]);
 
         $attributes = ProductAttribute::query()

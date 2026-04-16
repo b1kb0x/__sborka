@@ -10,6 +10,7 @@ class ProductController extends Controller
     public function index(): View
     {
         $products = Product::query()
+            ->with('primaryImage')
             ->active()
             ->latest()
             ->get();
@@ -25,6 +26,7 @@ class ProductController extends Controller
             ->active()
             ->where('slug', $slug)
             ->with([
+                'primaryImage',
                 'attributeValues.attribute',
                 'attributeValues.option',
             ])

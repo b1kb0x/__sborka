@@ -8,9 +8,9 @@
 
         <h1>{{ $product->title }}</h1>
 
-        @if($product->image_path)
+        @if($product->primaryImage)
             <p>
-                <img src="{{ asset($product->image_path) }}" alt="{{ $product->title }}" width="300">
+                <img src="{{ $product->primaryImage->original_url }}" alt="{{ $product->primaryImage->alt ?? $product->title }}" width="300">
             </p>
         @endif
 

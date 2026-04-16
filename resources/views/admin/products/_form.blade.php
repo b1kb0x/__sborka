@@ -65,21 +65,6 @@
 </div>
 
 <div style="margin-bottom:15px;">
-    <label for="image_path">Путь к изображению</label><br>
-    <input
-        type="text"
-        name="image_path"
-        id="image_path"
-        value="{{ old('image_path', $product?->image_path) }}"
-        style="width:100%;"
-        placeholder="images/products/coffee-1.jpg"
-    >
-    @error('image_path')
-    <div style="color:red;">{{ $message }}</div>
-    @enderror
-</div>
-
-<div style="margin-bottom:15px;">
     <label for="price">Цена</label><br>
     <input
         type="number"
@@ -122,14 +107,6 @@
     @error('is_active')
     <div style="color:red;">{{ $message }}</div>
     @enderror
-    <form action="{{ route('admin.products.image.store', $product) }}" method="POST" enctype="multipart/form-data">
-        @csrf
-
-        <input type="file" name="image" required>
-        <input type="text" name="alt" value="{{ old('alt', $product->primaryImage?->alt) }}" placeholder="Alt текст">
-
-        <button type="submit">Загрузить фото</button>
-    </form>
 </div>
 
 @if($attributes->isNotEmpty())
@@ -191,7 +168,7 @@
                     id="attribute_{{ $attribute->id }}"
                     style="width:100%;"
                 >
-                    <option value="">— Не выбрано —</option>
+                    <option value="">-- Не выбрано --</option>
                     <option value="1" {{ (string) $booleanOld === '1' ? 'selected' : '' }}>Да</option>
                     <option value="0" {{ (string) $booleanOld === '0' ? 'selected' : '' }}>Нет</option>
                 </select>
@@ -201,7 +178,7 @@
                     id="attribute_{{ $attribute->id }}"
                     style="width:100%;"
                 >
-                    <option value="">— Не выбрано —</option>
+                    <option value="">-- Не выбрано --</option>
 
                     @foreach($attribute->options as $option)
                         <option

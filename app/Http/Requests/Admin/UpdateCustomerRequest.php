@@ -19,7 +19,9 @@ class UpdateCustomerRequest extends FormRequest
         $customer = $this->route('customer');
 
         return [
-            'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['nullable', 'string', 'max:255'],
+            'last_name' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:255'],
             'email' => [
                 'required',
                 'email',
@@ -27,6 +29,9 @@ class UpdateCustomerRequest extends FormRequest
                 Rule::unique('users', 'email')->ignore(is_object($customer) ? $customer->id : $customer),
             ],
             'status' => ['required', new Enum(UserStatus::class)],
+            'region' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'address' => ['nullable', 'string', 'max:1000'],
         ];
     }
 }

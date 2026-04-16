@@ -63,11 +63,13 @@
                         <td>{{ $customer->name }}</td>
                         <td>{{ $customer->email }}</td>
                         <td>{{ $customer->status?->value ?? $customer->status }}</td>
-                        <td>{{ $customer->orders_count }}</td>
                         <td>
-                            <a href="{{ route('admin.customers.show', $customer) }}">Open</a>
-                            |
-                            <a href="{{ route('admin.customers.edit', $customer) }}">Edit</a>
+                            <a href="{{ route('admin.orders.index', ['customer' => $customer->id]) }}">
+                                {{ $customer->orders_count }}
+                            </a>
+                        </td>
+                        <td>
+                            <a href="{{ route('admin.customers.show', $customer) }}">Edit</a>
                         </td>
                     </tr>
                 @endforeach

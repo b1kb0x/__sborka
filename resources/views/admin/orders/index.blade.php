@@ -10,6 +10,14 @@
             </div>
         @endif
 
+        @if($filteredCustomer)
+            <div style="margin-bottom:15px; padding:10px; border:1px solid #ddd;">
+                Filtering by customer:
+                <strong>{{ $filteredCustomer->name ?: $filteredCustomer->email }}</strong>
+                <a href="{{ route('admin.orders.index') }}" style="margin-left:10px;">Clear filter</a>
+            </div>
+        @endif
+
         <table border="1" cellpadding="10" cellspacing="0" width="100%">
             <thead>
             <tr>
@@ -38,5 +46,9 @@
             @endforeach
             </tbody>
         </table>
+
+        <div style="margin-top:20px;">
+            {{ $orders->links() }}
+        </div>
     </div>
 @endsection

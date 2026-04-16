@@ -44,7 +44,6 @@ Route::middleware(['auth', 'active.user', 'admin'])->group(function () {
 
         Route::get('customers', [AdminCustomerController::class, 'index'])->name('customers.index');
         Route::get('customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
-        Route::get('customers/{customer}/edit', [AdminCustomerController::class, 'edit'])->name('customers.edit');
         Route::put('customers/{customer}', [AdminCustomerController::class, 'update'])->name('customers.update');
 
         Route::prefix('product-attributes/{productAttribute}/options')

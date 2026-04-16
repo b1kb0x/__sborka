@@ -6,6 +6,7 @@ use App\Enums\FulfillmentStatus;
 use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -13,15 +14,29 @@ use Illuminate\View\View;
 
 class OrderController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $orders = Order::query()
+        $query = Order::query()
             ->with('user')
-            ->latest()
-            ->paginate(20);
+            ->latest();
+
+        $filteredCustomer = null;
+
+        if ($request->filled('customer')) {
+            $filteredCustomer = User::query()
+                ->where('role', 'customer')
+                ->find($request->integer('customer'));
+
+            if ($filteredCustomer) {
+                $query->where('user_id', $filteredCustomer->id);
+            }
+        }
+
+        $orders = $query->paginate(20)->withQueryString();
 
         return view('admin.orders.index', [
             'orders' => $orders,
+            'filteredCustomer' => $filteredCustomer,
         ]);
     }
 

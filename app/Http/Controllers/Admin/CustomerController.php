@@ -47,20 +47,7 @@ class CustomerController extends Controller
     {
         abort_unless($customer->role === UserRole::Customer, 404);
 
-        $customer->load([
-            'orders' => fn ($query) => $query->latest(),
-        ]);
-
         return view('admin.customers.show', [
-            'customer' => $customer,
-        ]);
-    }
-
-    public function edit(User $customer): View
-    {
-        abort_unless($customer->role === UserRole::Customer, 404);
-
-        return view('admin.customers.edit', [
             'customer' => $customer,
         ]);
     }
@@ -69,10 +56,28 @@ class CustomerController extends Controller
     {
         abort_unless($customer->role === UserRole::Customer, 404);
 
-        $customer->update($request->validated());
+        $validated = $request->validated();
+        $validated['name'] = $this->buildCustomerName(
+            $validated['first_name'] ?? '',
+            $validated['last_name'] ?? '',
+            $customer
+        );
+
+        $customer->update($validated);
 
         return redirect()
-            ->route('admin.customers.index')
+            ->route('admin.customers.show', $customer)
             ->with('success', 'Покупатель обновлён.');
+    }
+
+    protected function buildCustomerName(string $firstName, string $lastName, User $customer): string
+    {
+        $name = trim($firstName.' '.$lastName);
+
+        if ($name !== '') {
+            return $name;
+        }
+
+        return $customer->name !== '' ? $customer->name : $customer->email;
     }
 }

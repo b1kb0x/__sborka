@@ -241,19 +241,19 @@ class CartService
 
             if (! $product) {
                 unset($cart[$rowId]);
-                $messages[] = "Товар \"{$cartItem->name}\" удален из корзины, потому что больше не существует.";
+                $messages[] = "Товар \"{$cartItem->name}\" удалён из корзины, потому что больше не существует.";
                 continue;
             }
 
             if (! $product->is_active) {
                 unset($cart[$rowId]);
-                $messages[] = "Товар \"{$cartItem->name}\" удален из корзины, потому что недоступен.";
+                $messages[] = "Товар \"{$cartItem->name}\" удалён из корзины, потому что недоступен.";
                 continue;
             }
 
             if ($product->stock < 1) {
                 unset($cart[$rowId]);
-                $messages[] = "Товар \"{$cartItem->name}\" удален из корзины, потому что закончился.";
+                $messages[] = "Товар \"{$cartItem->name}\" удалён из корзины, потому что закончился.";
                 continue;
             }
 
@@ -290,6 +290,7 @@ class CartService
 
         if (empty($cart)) {
             $errors[] = 'Корзина пуста.';
+
             return $errors;
         }
 

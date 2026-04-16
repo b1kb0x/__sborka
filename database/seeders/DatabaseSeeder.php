@@ -24,10 +24,10 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             UserSeeder::class,
-            ProductSeeder::class,
-            OrderSeeder::class,
             ProductAttributeSeeder::class,
             ProductAttributeOptionSeeder::class,
+            ProductSeeder::class,
+            OrderSeeder::class,
         ]);
     }
 }

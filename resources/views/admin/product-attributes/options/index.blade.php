@@ -1,21 +1,24 @@
 @extends('admin.layout.admin')
 
+@section('header')
+    <div class="col">
+        <h2 class="page-title">Options</h2>
+        <div class="text-secondary mt-1">...</div>
+    </div>
+
+    <div class="col-auto ms-auto d-print-none">
+        <a href="{{ route('admin.product-attributes.options.create', $productAttribute) }}" class="btn btn-primary">
+            Create option
+        </a>
+    </div>
+@endsection
+
 @section('content')
-    <div class="container">
-        <p>
-            <a href="{{ route('admin.product-attributes.index') }}">← Назад к характеристикам</a>
-        </p>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <div>
-                <h1>Опции характеристики</h1>
-                <p><strong>{{ $productAttribute->name }}</strong> ({{ $productAttribute->slug }})</p>
-            </div>
+    <p>
+        <a href="{{ route('admin.product-attributes.index', $productAttribute) }}" class="text-body-secondary text-decoration-none">← Back to Attributes</a>
+    </p>
 
-            <a href="{{ route('admin.product-attributes.options.create', $productAttribute) }}">
-                Создать опцию
-            </a>
-        </div>
 
         @if(session('success'))
             <div style="margin-bottom:15px; padding:10px; border:1px solid green;">
@@ -32,24 +35,25 @@
         @if($options->isEmpty())
             <p>Опций пока нет.</p>
         @else
-            <table border="1" cellpadding="10" cellspacing="0" width="100%">
+
+            <div class="card">
+                <div class="card-header"></div>
+            <table class="table table-selectable card-table table-vcenter text-nowrap datatable">
                 <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Значение</th>
-                    <th>Сортировка</th>
-                    <th>Действия</th>
+                    <th class="text-center">Сортировка</th>
+                    <th class="w-1">Действия</th>
                 </tr>
                 </thead>
                 <tbody>
                 @foreach($options as $option)
                     <tr>
-                        <td>{{ $option->id }}</td>
                         <td>{{ $option->value }}</td>
-                        <td>{{ $option->sort_order }}</td>
+                        <td class="text-center">{{ $option->sort_order }}</td>
                         <td>
-                            <a href="{{ route('admin.product-attributes.options.edit', [$productAttribute, $option]) }}">
-                                Редактировать
+                            <a href="{{ route('admin.product-attributes.options.edit', [$productAttribute, $option]) }}" class="btn btn-outline-primary">
+                                Edit
                             </a>
 
                             <form action="{{ route('admin.product-attributes.options.destroy', [$productAttribute, $option]) }}"
@@ -58,16 +62,16 @@
                                   onsubmit="return confirm('Удалить опцию?')">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit">Удалить</button>
+                                <button type="submit" class="btn btn-outline-danger">Delete</button>
                             </form>
                         </td>
                     </tr>
                 @endforeach
                 </tbody>
             </table>
-
-            <div style="margin-top:20px;">
-                {{ $options->links() }}
+                <div class="card-footer">
+                    {{ $options->links() }}
+                </div>
             </div>
         @endif
     </div>

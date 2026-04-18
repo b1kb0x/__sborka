@@ -8,10 +8,13 @@
 @endsection
 
 @section('content')
-    <div class="container">
+
         <p>
             <a href="{{ route('admin.product-attributes.index') }}" class="text-body-secondary text-decoration-none">← Back to Attributes</a>
         </p>
+
+        <div class="card">
+            <div class="card-body">
 
         <form action="{{ route('admin.product-attributes.update', $productAttribute) }}" method="POST">
             @csrf
@@ -19,7 +22,10 @@
 
             @include('admin.product-attributes._form', ['productAttribute' => $productAttribute])
 
-            <button type="submit">Обновить</button>
+            <button type="submit" class="btn btn-primary">Обновить</button>
         </form>
-    </div>
+
+            </div>
+        </div>
+
 @endsection

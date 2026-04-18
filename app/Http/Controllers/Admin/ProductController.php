@@ -41,7 +41,7 @@ class ProductController extends Controller
         ]);
     }
 
-    public function store(StoreProductRequest $request): RedirectResponse
+    public function store(StoreProductRequest $request, ProductImageService $service): RedirectResponse
     {
         $data = $request->validated();
 
@@ -51,11 +51,20 @@ class ProductController extends Controller
 
         $data['is_active'] = (bool) ($data['is_active'] ?? false);
 
-        DB::transaction(function () use ($request, $data): void {
+        $product = DB::transaction(function () use ($request, $data) {
             $product = Product::create($data);
-
             $this->syncAttributeValues($product, $request->input('attributes', []));
+
+            return $product;
         });
+
+        if ($request->hasFile('image')) {
+            $service->uploadPrimary(
+                $product,
+                $request->file('image'),
+                $request->input('alt')
+            );
+        }
 
         return redirect()
             ->route('admin.products.index')

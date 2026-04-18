@@ -66,6 +66,43 @@
     @enderror
 </div>
 
+        <div class="mb-3">
+            <label class="form-label">Изображение</label>
+
+            <label for="image" class="dropzone @error('image') is-invalid @enderror">
+                <div class="dz-message">
+                    <h3 class="dropzone-msg-title">Drop files here to upload</h3>
+                    <div class="text-secondary">or click to browse</div>
+                </div>
+
+                <input
+                    id="image"
+                    type="file"
+                    name="image"
+                    class="d-none"
+                    accept=".jpg,.jpeg,.png,.webp,image/*"
+                >
+            </label>
+
+            @error('image')
+            <div class="invalid-feedback d-block">{{ $message }}</div>
+            @enderror
+        </div>
+
+        <div class="mb-3">
+            <label for="alt" class="form-label">Alt</label>
+            <input
+                id="alt"
+                type="text"
+                name="alt"
+                value="{{ old('alt') }}"
+                class="form-control @error('alt') is-invalid @enderror"
+            >
+            @error('alt')
+            <div class="invalid-feedback">{{ $message }}</div>
+            @enderror
+        </div>
+
 <div class="mb-3">
     <label for="price" class="form-label">Цена</label>
     <input

@@ -47,7 +47,7 @@
                             <td>
                                 <div class="d-flex justify-content-end gap-2">
                                     <a href="{{ route('admin.products.edit', $product) }}"
-                                       class="btn btn-outline-primary btn-sm">Edit</a>
+                                       class="btn btn-outline-primary">Edit</a>
 
                                     <form action="{{ route('admin.products.destroy', $product) }}"
                                           method="POST"
@@ -55,7 +55,7 @@
                                           onsubmit="return confirm('Удалить товар?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                                        <button type="submit" class="btn btn-outline-danger">Delete</button>
                                     </form>
                                 </div>
                             </td>

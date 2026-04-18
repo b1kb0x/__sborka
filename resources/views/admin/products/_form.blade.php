@@ -10,109 +10,119 @@
         : collect();
 @endphp
 
-<div style="margin-bottom:15px;">
-    <label for="title">Название</label><br>
+<div class="card mb-5">
+    <div class="card-body">
+<div class="mb-3">
+    <label for="title" class="form-label">Название</label>
     <input
         type="text"
         name="title"
         id="title"
         value="{{ old('title', $product?->title) }}"
-        style="width:100%;"
+        class="form-control"
     >
     @error('title')
-    <div style="color:red;">{{ $message }}</div>
+        <div class="invalid-feedback">{{ $message }}</div>
     @enderror
 </div>
 
-<div style="margin-bottom:15px;">
-    <label for="slug">Slug</label><br>
+<div class="mb-3">
+    <label for="slug" class="form-label">Slug</label>
     <input
         type="text"
         name="slug"
         id="slug"
         value="{{ old('slug', $product?->slug) }}"
-        style="width:100%;"
+        class="form-control"
     >
     @error('slug')
-    <div style="color:red;">{{ $message }}</div>
+    <div class="invalid-feedback">{{ $message }}</div>
     @enderror
 </div>
 
-<div style="margin-bottom:15px;">
-    <label for="short_description">Краткое описание</label><br>
+<div class="mb-3">
+    <label for="short_description" class="form-label">Краткое описание</label>
     <textarea
         name="short_description"
         id="short_description"
         rows="3"
-        style="width:100%;"
+        class="form-control"
     >{{ old('short_description', $product?->short_description) }}</textarea>
     @error('short_description')
-    <div style="color:red;">{{ $message }}</div>
+    <div class="invalid-feedback">{{ $message }}</div>
     @enderror
 </div>
 
-<div style="margin-bottom:15px;">
-    <label for="description">Описание</label><br>
+<div class="mb-3">
+    <label for="description" class="form-label">Описание</label>
     <textarea
         name="description"
         id="description"
         rows="8"
-        style="width:100%;"
+        class="form-control"
     >{{ old('description', $product?->description) }}</textarea>
     @error('description')
-    <div style="color:red;">{{ $message }}</div>
+    <div class="invalid-feedback">{{ $message }}</div>
     @enderror
 </div>
 
-<div style="margin-bottom:15px;">
-    <label for="price">Цена</label><br>
+<div class="mb-3">
+    <label for="price" class="form-label">Цена</label>
     <input
         type="number"
         name="price"
         id="price"
         value="{{ old('price', $product?->price ?? 0) }}"
         min="0"
-        style="width:100%;"
+        class="form-control"
     >
     @error('price')
-    <div style="color:red;">{{ $message }}</div>
+    <div class="invalid-feedback">{{ $message }}</div>
     @enderror
 </div>
 
-<div style="margin-bottom:15px;">
-    <label for="stock">Остаток</label><br>
+<div class="mb-3">
+    <label for="stock" class="form-label">Остаток</label>
     <input
         type="number"
         name="stock"
         id="stock"
         value="{{ old('stock', $product?->stock ?? 0) }}"
         min="0"
-        style="width:100%;"
+        class="form-control"
     >
     @error('stock')
-    <div style="color:red;">{{ $message }}</div>
+    <div class="invalid-feedback">{{ $message }}</div>
     @enderror
 </div>
 
-<div style="margin-bottom:15px;">
-    <label>
+<div class="mb-3">
+    <label class="form-check form-switch">
         <input
+            class="form-check-input"
             type="checkbox"
             name="is_active"
             value="1"
             {{ old('is_active', $product?->is_active ?? true) ? 'checked' : '' }}
         >
-        Активен
+        <span class="form-check-label">Активен</span>
     </label>
     @error('is_active')
-    <div style="color:red;">{{ $message }}</div>
+    <div class="invalid-feedback">{{ $message }}</div>
     @enderror
 </div>
 
-@if($attributes->isNotEmpty())
-    <hr style="margin:30px 0;">
+    </div>
+</div>
 
-    <h2>Характеристики</h2>
+<div class="card mb-5">
+    <div class="card-header">
+        <h3 class="card-title">Характеристики</h3>
+    </div>
+        <div class="card-body">
+
+@if($attributes->isNotEmpty())
+
 
     @foreach($attributes as $attribute)
         @php
@@ -121,7 +131,7 @@
         @endphp
 
         <div style="margin-bottom:20px; padding:12px; border:1px solid #ddd;">
-            <label for="attribute_{{ $attribute->id }}">
+            <label for="attribute_{{ $attribute->id }}" class="form-label">
                 <strong>{{ $attribute->name }}</strong>
                 @if($attribute->unit)
                     <span style="color:#666;">({{ $attribute->unit }})</span>
@@ -140,14 +150,14 @@
                     name="{{ $fieldName }}"
                     id="attribute_{{ $attribute->id }}"
                     value="{{ old($fieldName, $currentValue?->value_string) }}"
-                    style="width:100%;"
+                    class="form-control"
                 >
             @elseif($attribute->type === 'text')
                 <textarea
                     name="{{ $fieldName }}"
                     id="attribute_{{ $attribute->id }}"
                     rows="4"
-                    style="width:100%;"
+                    class="form-control"
                 >{{ old($fieldName, $currentValue?->value_text) }}</textarea>
             @elseif($attribute->type === 'number')
                 <input
@@ -156,7 +166,7 @@
                     name="{{ $fieldName }}"
                     id="attribute_{{ $attribute->id }}"
                     value="{{ old($fieldName, $currentValue?->value_number) }}"
-                    style="width:100%;"
+                    class="form-control"
                 >
             @elseif($attribute->type === 'boolean')
                 @php
@@ -166,7 +176,7 @@
                 <select
                     name="{{ $fieldName }}"
                     id="attribute_{{ $attribute->id }}"
-                    style="width:100%;"
+                    class="form-control"
                 >
                     <option value="">-- Не выбрано --</option>
                     <option value="1" {{ (string) $booleanOld === '1' ? 'selected' : '' }}>Да</option>
@@ -176,7 +186,7 @@
                 <select
                     name="{{ $fieldName }}"
                     id="attribute_{{ $attribute->id }}"
-                    style="width:100%;"
+                    class="form-control"
                 >
                     <option value="">-- Не выбрано --</option>
 
@@ -193,3 +203,5 @@
         </div>
     @endforeach
 @endif
+        </div>
+</div>

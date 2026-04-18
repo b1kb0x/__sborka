@@ -6,6 +6,7 @@
     <title>@yield('title', config('app.name'))</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/css/tabler.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css">
     <style>
         .orders-menu-badge {
             margin-left: auto;
@@ -21,6 +22,9 @@
             line-height: 1;
             background: rgba(214, 57, 57, .18);
             color: #ff6b6b;
+        }
+        .invalid-feedback {
+            display: block;
         }
     </style>
 </head>
@@ -54,6 +58,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/js/tabler.min.js"></script>
-{{-- @stack('scripts')--}}
+<script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+@stack('scripts')
 </body>
 </html>

@@ -45,6 +45,10 @@
 !database/seeders/
 !database/seeders/**
 
+# test
+tests/
+tests/**
+
 # Дополнительная защита от лишнего
 vendor/
 node_modules/
@@ -52,7 +56,6 @@ public/
 storage/
 bootstrap/
 config/
-tests/
 .env
 .env.*
 composer.lock

@@ -103,7 +103,7 @@
                             <td>{{ $order->created_at?->format('d.m.Y H:i') ?? '—' }}</td>
 
                             <td>
-                                <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-outline-primary btn-sm">
+                                <a href="{{ route('admin.orders.edit', $order) }}" class="btn btn-outline-primary">
                                     Open
                                 </a>
                             </td>

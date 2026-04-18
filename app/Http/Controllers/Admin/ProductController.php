@@ -44,11 +44,6 @@ class ProductController extends Controller
     public function store(StoreProductRequest $request, ProductImageService $service): RedirectResponse
     {
         $data = $request->validated();
-
-        $data['slug'] = filled($data['slug'] ?? null)
-            ? Str::slug($data['slug'])
-            : Str::slug($data['title']);
-
         $data['is_active'] = (bool) ($data['is_active'] ?? false);
 
         $product = DB::transaction(function () use ($request, $data) {
@@ -67,7 +62,7 @@ class ProductController extends Controller
         }
 
         return redirect()
-            ->route('admin.products.index')
+            ->route('admin.products.edit', $product)
             ->with('success', 'Товар создан.');
     }
 
@@ -127,7 +122,7 @@ class ProductController extends Controller
         }
 
         return redirect()
-            ->route('admin.products.index')
+            ->route('admin.products.edit', $product)
             ->with('success', 'Товар обновлён.');
     }
 

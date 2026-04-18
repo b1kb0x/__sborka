@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class StoreProductRequest extends FormRequest
@@ -10,6 +11,17 @@ class StoreProductRequest extends FormRequest
     public function authorize(): bool
     {
         return true;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $slug = $this->input('slug');
+
+        $this->merge([
+            'slug' => filled($slug)
+                ? Str::slug($slug)
+                : Str::slug((string) $this->input('title')),
+        ]);
     }
 
     public function rules(): array

@@ -16,6 +16,8 @@
         </a>
     </p>
 
+    @include('admin.components.flash-success')
+
     <form action="{{ route('admin.products.update', $product) }}" method="POST" enctype="multipart/form-data">
         @csrf
         @method('PUT')
@@ -26,14 +28,5 @@
         ])
 
         <button type="submit" class="btn btn-outline-primary">Обновить</button>
-    </form>
-    <form
-        id="delete-product-image-form"
-        action="{{ route('admin.products.image.destroy', $product) }}"
-        method="POST"
-        class="d-none"
-    >
-        @csrf
-        @method('DELETE')
     </form>
 @endsection

@@ -14,6 +14,8 @@
         <a href="{{ route('admin.products.index') }}" class="text-body-secondary text-decoration-none">← Back to Products</a>
     </p>
 
+    @include('admin.components.flash-success')
+
     <form method="POST" action="{{ route('admin.products.store') }}" enctype="multipart/form-data">
         @csrf
         @include('admin.products._form', ['attributes' => $attributes])

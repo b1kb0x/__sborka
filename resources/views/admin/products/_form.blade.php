@@ -188,20 +188,6 @@
             </script>
         @endpush
 
-        <div class="mb-3">
-            <label for="alt" class="form-label">Alt</label>
-            <input
-                id="alt"
-                type="text"
-                name="alt"
-                value="{{ old('alt', $product?->primaryImage?->alt) }}"
-                class="form-control @error('alt') is-invalid @enderror"
-            >
-            @error('alt')
-            <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-
 <div class="mb-3">
     <label for="price" class="form-label">Цена</label>
     <input

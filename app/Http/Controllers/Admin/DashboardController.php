@@ -11,11 +11,12 @@ class DashboardController extends Controller
     public function index(): View
     {
         $newOrders = Order::query()
+            ->where('status', 'new') // замени на твой реальный статус
             ->latest()
             ->take(10)
             ->get();
 
-        return view('admin.dashboard', [
+        return view('admin.dashboard.index', [
             'newOrders' => $newOrders,
         ]);
     }

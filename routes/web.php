@@ -34,12 +34,9 @@ Route::middleware(['auth', 'active.user'])->group(function () {
 });
 
 Route::middleware(['auth', 'active.user', 'admin'])->group(function () {
-    Route::get('/admin', function () {
-        return view('admin.dashboard.index', ['user' => Auth::user()]);
-    })->name('admin.dashboard');
+    Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
 
         Route::resource('products', AdminProductController::class)->except(['show']);
         Route::resource('product-attributes', AdminProductAttributeController::class)->except(['show']);

@@ -26,6 +26,43 @@
         .invalid-feedback {
             display: block;
         }
+
+        .product-dropzone {
+            display: block;
+            border: 1px dashed var(--tblr-border-color, #cbd5e1);
+            border-radius: var(--tblr-border-radius, 8px);
+            background: var(--tblr-bg-surface, #fff);
+            cursor: pointer;
+            transition: border-color .2s ease, background-color .2s ease, box-shadow .2s ease;
+            max-width: 420px;
+        }
+
+        .product-dropzone:hover {
+            border-color: var(--tblr-primary, #206bc4);
+            background: rgba(32, 107, 196, 0.03);
+        }
+
+        .product-dropzone.is-dragover {
+            border-color: var(--tblr-primary, #206bc4);
+            background: rgba(32, 107, 196, 0.06);
+            box-shadow: 0 0 0 3px rgba(32, 107, 196, 0.08);
+        }
+
+        .product-dropzone-inner {
+            min-height: 180px;
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .product-dropzone-title {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -59,6 +96,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/js/tabler.min.js"></script>
 <script src="https://unpkg.com/dropzone@5/dist/min/dropzone.min.js"></script>
+<script>
+    if (window.Dropzone) {
+        Dropzone.autoDiscover = false;
+    }
+</script>
 @stack('scripts')
 </body>
 </html>

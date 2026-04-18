@@ -69,10 +69,38 @@
         <div class="mb-3">
             <label class="form-label">Изображение</label>
 
-            <label for="image" class="dropzone @error('image') is-invalid @enderror">
-                <div class="dz-message">
-                    <h3 class="dropzone-msg-title">Drop files here to upload</h3>
+            <label for="image" id="product-image-drop" class="product-dropzone @error('image') is-invalid @enderror">
+
+                @if($product?->primaryImage)
+                    <div class="mb-3">
+                        <img
+                            src="{{ $product->primaryImage->preview_url }}"
+                            alt="{{ $product->primaryImage->alt ?? $product->title }}"
+                            class="img-fluid rounded border"
+                            style="max-width: 300px;"
+                        >
+
+                        <div class="text-secondary mt-2">
+                            Alt: {{ $product->primaryImage->alt ?? '—' }}
+                        </div>
+
+                        <div class="mt-3">
+                            <button
+                                type="submit"
+                                form="delete-product-image-form"
+                                class="btn btn-outline-danger"
+                                onclick="return confirm('Удалить фото?')"
+                            >
+                                Удалить фото
+                            </button>
+                        </div>
+                    </div>
+                @endif
+
+                <div class="product-dropzone-inner">
+                    <h3 class="product-dropzone-title mb-2">Drop files here to upload</h3>
                     <div class="text-secondary">or click to browse</div>
+                    <div id="product-image-name" class="text-secondary mt-2 d-none"></div>
                 </div>
 
                 <input
@@ -89,13 +117,70 @@
             @enderror
         </div>
 
+        @push('scripts')
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const dropzone = document.getElementById('product-image-drop');
+                    const input = document.getElementById('image');
+                    const fileName = document.getElementById('product-image-name');
+
+                    if (!dropzone || !input) {
+                        return;
+                    }
+
+                    const showFileName = (file) => {
+                        if (!fileName) return;
+
+                        if (file) {
+                            fileName.textContent = file.name;
+                            fileName.classList.remove('d-none');
+                        } else {
+                            fileName.textContent = '';
+                            fileName.classList.add('d-none');
+                        }
+                    };
+
+                    input.addEventListener('change', function () {
+                        showFileName(this.files[0] ?? null);
+                    });
+
+                    ['dragenter', 'dragover'].forEach((eventName) => {
+                        dropzone.addEventListener(eventName, function (event) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            dropzone.classList.add('is-dragover');
+                        });
+                    });
+
+                    ['dragleave', 'dragend', 'drop'].forEach((eventName) => {
+                        dropzone.addEventListener(eventName, function (event) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            dropzone.classList.remove('is-dragover');
+                        });
+                    });
+
+                    dropzone.addEventListener('drop', function (event) {
+                        const files = event.dataTransfer?.files;
+
+                        if (!files || !files.length) {
+                            return;
+                        }
+
+                        input.files = files;
+                        showFileName(files[0]);
+                    });
+                });
+            </script>
+        @endpush
+
         <div class="mb-3">
             <label for="alt" class="form-label">Alt</label>
             <input
                 id="alt"
                 type="text"
                 name="alt"
-                value="{{ old('alt') }}"
+                value="{{ old('alt', $product?->primaryImage?->alt) }}"
                 class="form-control @error('alt') is-invalid @enderror"
             >
             @error('alt')

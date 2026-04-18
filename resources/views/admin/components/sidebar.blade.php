@@ -62,11 +62,28 @@
                 </li>
 
                 <li class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
-                    <a class="nav-link" href="{{ route('admin.orders.index') }}">
+                <li class="nav-item">
+                    <a class="nav-link {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"
+                       href="{{ route('admin.orders.index', ['status' => 'new']) }}">
                         <span class="nav-link-icon d-md-none d-lg-inline-block">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-shopping-cart"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 19a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M15 19a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M17 17h-11v-14h-2" /><path d="M6 5l14 1l-1 7h-13" /></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-1" width="24" height="24" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M6 2l3 1l-2 6.5a1 1 0 0 0 1 1.5h12"></path>
+                                <path d="M8 13h10l2 -8h-15"></path>
+                                <path d="M8 13l-2 7"></path>
+                                <path d="M16 13l2 7"></path>
+                                <path d="M10 20a1 1 0 1 0 0 .01"></path>
+                                <path d="M18 20a1 1 0 1 0 0 .01"></path>
+                            </svg>
                         </span>
+
                         <span class="nav-link-title">Orders</span>
+
+                        @if(($newOrdersCount ?? 0) > 0)
+                            <span class="orders-menu-badge">
+                                {{ $newOrdersCount > 99 ? '99+' : $newOrdersCount }}
+                            </span>
+                        @endif
                     </a>
                 </li>
 

@@ -8,6 +8,9 @@ use App\Repositories\Contracts\CartRepository;
 use App\Repositories\HybridCartRepository;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
+use App\Enums\OrderStatus;
+use App\Models\Order;
+use Illuminate\Support\Facades\View;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,5 +29,12 @@ class AppServiceProvider extends ServiceProvider
     {
         Product::observe(ProductObserver::class);
         Paginator::useBootstrapFive();
+        View::composer('admin.components.sidebar', function ($view): void {
+            $newOrdersCount = Order::query()
+                ->where('status', OrderStatus::New->value)
+                ->count();
+
+            $view->with('newOrdersCount', $newOrdersCount);
+        });
     }
 }

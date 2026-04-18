@@ -6,7 +6,23 @@
     <title>@yield('title', config('app.name'))</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/css/tabler.min.css">
-
+    <style>
+        .orders-menu-badge {
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 1.5rem;
+            height: 1.5rem;
+            padding: 0 .4rem;
+            border-radius: 9999px;
+            font-size: .75rem;
+            font-weight: 600;
+            line-height: 1;
+            background: rgba(214, 57, 57, .18);
+            color: #ff6b6b;
+        }
+    </style>
 </head>
 <body>
 

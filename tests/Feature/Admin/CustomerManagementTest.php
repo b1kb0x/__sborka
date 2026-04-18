@@ -2,7 +2,9 @@
 
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
+use App\Models\Order;
 use App\Models\User;
+use App\Services\SettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -20,10 +22,26 @@ it('shows user status in the admin customers list without delete or restore cont
         'status' => UserStatus::Blocked,
     ]);
 
+    Order::query()->create([
+        'user_id' => $customer->id,
+        'first_name' => 'Managed',
+        'last_name' => 'Customer',
+        'phone' => '+380000000000',
+        'email' => $customer->email,
+        'region' => 'Kyiv region',
+        'city' => 'Kyiv',
+        'address' => 'Main street 1',
+        'comment' => null,
+        'subtotal' => 1000,
+        'total' => 1000,
+        'status' => 'new',
+        'fulfillment_status' => 'accepted',
+    ]);
+
     $this->actingAs($admin)
         ->get(route('admin.customers.index'))
         ->assertOk()
-        ->assertSee('UserStatus')
+        ->assertSee('Status')
         ->assertSee('blocked')
         ->assertSee(route('admin.orders.index', ['customer' => $customer->id]), false)
         ->assertDontSee('with_trashed', false)
@@ -76,12 +94,12 @@ it('uses the customer show page as the main edit form and updates profile fields
     ]);
 
     $this->actingAs($admin)
-        ->get(route('admin.customers.show', $customer))
+        ->get(route('admin.customers.edit', $customer))
         ->assertOk()
         ->assertSee('First name')
         ->assertSee('Last name')
         ->assertSee('Customer status')
-        ->assertSee(route('admin.orders.index', ['customer' => $customer->id]), false);
+        ->assertDontSee('Open');
 
     $this->actingAs($admin)
         ->put(route('admin.customers.update', $customer), [
@@ -94,7 +112,7 @@ it('uses the customer show page as the main edit form and updates profile fields
             'city' => 'Kyiv',
             'address' => 'Main street 10',
         ])
-        ->assertRedirect(route('admin.customers.show', $customer));
+        ->assertRedirect(route('admin.customers.edit', $customer));
 
     $customer->refresh();
 
@@ -123,4 +141,42 @@ it('no longer exposes a separate customer edit route', function () {
     $this->actingAs($admin)
         ->get("/admin/customers/{$customer->id}/edit")
         ->assertNotFound();
+});
+
+it('uses customers per page from settings in the admin customers list', function () {
+    $admin = User::factory()->create([
+        'role' => UserRole::Admin,
+        'status' => UserStatus::Active,
+    ]);
+
+    app(SettingsService::class)->set('admin.customers_per_page', 3);
+
+    User::factory()->count(5)->create([
+        'role' => UserRole::Customer,
+        'status' => UserStatus::Active,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.customers.index'))
+        ->assertOk()
+        ->assertViewHas('customers', fn ($customers) => $customers->perPage() === 3 && $customers->count() === 3);
+});
+
+it('falls back to 20 customers per page when the setting is invalid', function () {
+    $admin = User::factory()->create([
+        'role' => UserRole::Admin,
+        'status' => UserStatus::Active,
+    ]);
+
+    app(SettingsService::class)->set('admin.customers_per_page', 0);
+
+    User::factory()->count(25)->create([
+        'role' => UserRole::Customer,
+        'status' => UserStatus::Active,
+    ]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.customers.index'))
+        ->assertOk()
+        ->assertViewHas('customers', fn ($customers) => $customers->perPage() === 20 && $customers->count() === 20);
 });

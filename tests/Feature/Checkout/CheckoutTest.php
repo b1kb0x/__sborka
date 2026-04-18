@@ -7,6 +7,7 @@ use App\Enums\UserStatus;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\SettingsService;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
@@ -116,7 +117,9 @@ it('admin cannot submit checkout order', function () {
     expect(Order::query()->count())->toBe(0);
 });
 
-it('guest can still open checkout page', function () {
+it('guest can open checkout page when guest checkout is enabled', function () {
+    app(SettingsService::class)->set('checkout.guest_checkout_enabled', true);
+
     $product = checkoutProduct();
 
     addItemToCart($this, $product);
@@ -125,7 +128,34 @@ it('guest can still open checkout page', function () {
         ->assertOk();
 });
 
-it('auth user successfully places order, keeps success flow, and does not see account-created message', function () {
+it('guest is redirected to login when guest checkout is disabled', function () {
+    app(SettingsService::class)->set('checkout.guest_checkout_enabled', false);
+
+    $product = checkoutProduct();
+
+    addItemToCart($this, $product);
+
+    $this->get(route('checkout.create'))
+        ->assertRedirect(route('login'));
+});
+
+it('guest cannot submit checkout when guest checkout is disabled', function () {
+    app(SettingsService::class)->set('checkout.guest_checkout_enabled', false);
+
+    $product = checkoutProduct();
+
+    addItemToCart($this, $product);
+
+    $this->post(route('cart.checkout'), checkoutPayload())
+        ->assertRedirect(route('login'));
+
+    expect(Order::query()->count())->toBe(0);
+    $this->assertGuest();
+});
+
+it('auth user successfully places order even when guest checkout is disabled, keeps success flow, and does not see account-created message', function () {
+    app(SettingsService::class)->set('checkout.guest_checkout_enabled', false);
+
     $user = User::factory()->create([
         'name' => 'Jane Saved',
         'first_name' => 'Jane',

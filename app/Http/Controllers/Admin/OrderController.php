@@ -7,6 +7,7 @@ use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\SettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -14,7 +15,7 @@ use Illuminate\View\View;
 
 class OrderController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, SettingsService $settings): View
     {
         $query = Order::query()
             ->with('user')
@@ -32,7 +33,9 @@ class OrderController extends Controller
             }
         }
 
-        $orders = $query->paginate(10)->withQueryString();
+        $orders = $query
+            ->paginate($settings->adminOrdersPerPage())
+            ->withQueryString();
 
         return view('admin.orders.index', [
             'orders' => $orders,

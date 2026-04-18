@@ -6,6 +6,7 @@ use App\Enums\GrindType;
 use App\Http\Requests\CheckoutRequest;
 use App\Services\CartService;
 use App\Services\OrderService;
+use App\Services\SettingsService;
 use DomainException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ class CartController extends Controller
     public function __construct(
         protected CartService $cartService,
         protected OrderService $orderService,
+        protected SettingsService $settingsService,
     ) {}
 
     public function index(): View
@@ -99,6 +101,12 @@ class CartController extends Controller
                 ->with('error', 'Admins cannot place orders.');
         }
 
+        if (! $request->user() && ! $this->settingsService->guestCheckoutEnabled()) {
+            return redirect()
+                ->route('login')
+                ->with('error', 'Please sign in to place an order.');
+        }
+
         $messages = $this->cartService->refresh();
         $cart = $this->cartService->cart();
 
@@ -117,6 +125,12 @@ class CartController extends Controller
 
     public function checkout(CheckoutRequest $request): RedirectResponse
     {
+        if (! $request->user() && ! $this->settingsService->guestCheckoutEnabled()) {
+            return redirect()
+                ->route('login')
+                ->with('error', 'Please sign in to place an order.');
+        }
+
         try {
             $result = $this->orderService->createFromCart($request->validated());
 

@@ -4,15 +4,21 @@ namespace App\Services;
 
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 use InvalidArgumentException;
 
 class SettingsService
 {
     private const CACHE_KEY = 'settings.all';
+    private const ADMIN_PER_PAGE_FALLBACK = 20;
 
     public function all(): array
     {
         return Cache::rememberForever(self::CACHE_KEY, function (): array {
+            if (! Schema::hasTable('settings')) {
+                return [];
+            }
+
             return Setting::query()
                 ->get()
                 ->mapWithKeys(function (Setting $setting): array {
@@ -50,6 +56,42 @@ class SettingsService
         );
 
         $this->forgetCache();
+    }
+
+    public function storeName(): string
+    {
+        $value = trim((string) $this->get('general.store_name', ''));
+
+        return $value !== '' ? $value : (string) config('app.name');
+    }
+
+    public function guestCheckoutEnabled(): bool
+    {
+        return (bool) $this->get('checkout.guest_checkout_enabled', true);
+    }
+
+    public function adminProductsPerPage(): int
+    {
+        return $this->normalizePositiveInteger(
+            $this->get('admin.products_per_page'),
+            self::ADMIN_PER_PAGE_FALLBACK
+        );
+    }
+
+    public function adminOrdersPerPage(): int
+    {
+        return $this->normalizePositiveInteger(
+            $this->get('admin.orders_per_page'),
+            self::ADMIN_PER_PAGE_FALLBACK
+        );
+    }
+
+    public function adminCustomersPerPage(): int
+    {
+        return $this->normalizePositiveInteger(
+            $this->get('admin.customers_per_page'),
+            self::ADMIN_PER_PAGE_FALLBACK
+        );
     }
 
     public function forgetCache(): void
@@ -106,5 +148,16 @@ class SettingsService
             Setting::TYPE_STRING => $value,
             default => $value,
         };
+    }
+
+    private function normalizePositiveInteger(mixed $value, int $default): int
+    {
+        if (! is_numeric($value)) {
+            return $default;
+        }
+
+        $normalized = (int) $value;
+
+        return $normalized > 0 ? $normalized : $default;
     }
 }

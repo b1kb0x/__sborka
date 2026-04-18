@@ -1,9 +1,10 @@
 <!doctype html>
 <html lang="en">
 <head>
+    @php($storeName = app(\App\Services\SettingsService::class)->storeName())
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@yield('title', config('app.name'))</title>
+    <title>@yield('title', $storeName)</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@latest/dist/css/tabler.min.css">
     <link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css">

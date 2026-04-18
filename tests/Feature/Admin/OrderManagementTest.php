@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\Order;
 use App\Models\User;
+use App\Services\SettingsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -141,4 +142,44 @@ it('filters the admin orders list by customer when requested', function () {
         ->assertSee((string) $targetOrder->id)
         ->assertDontSee('Other Customer')
         ->assertDontSee($otherCustomer->email);
+});
+
+it('uses orders per page from settings in the admin orders list', function () {
+    $admin = User::factory()->create([
+        'role' => UserRole::Admin,
+        'status' => UserStatus::Active,
+    ]);
+
+    app(SettingsService::class)->set('admin.orders_per_page', 3);
+
+    foreach (range(1, 5) as $index) {
+        Order::query()->create(adminOrderPayload([
+            'email' => "order-{$index}@example.test",
+        ]));
+    }
+
+    $this->actingAs($admin)
+        ->get(route('admin.orders.index'))
+        ->assertOk()
+        ->assertViewHas('orders', fn ($orders) => $orders->perPage() === 3 && $orders->count() === 3);
+});
+
+it('falls back to 20 orders per page when the setting is invalid', function () {
+    $admin = User::factory()->create([
+        'role' => UserRole::Admin,
+        'status' => UserStatus::Active,
+    ]);
+
+    app(SettingsService::class)->set('admin.orders_per_page', 0);
+
+    foreach (range(1, 25) as $index) {
+        Order::query()->create(adminOrderPayload([
+            'email' => "fallback-order-{$index}@example.test",
+        ]));
+    }
+
+    $this->actingAs($admin)
+        ->get(route('admin.orders.index'))
+        ->assertOk()
+        ->assertViewHas('orders', fn ($orders) => $orders->perPage() === 20 && $orders->count() === 20);
 });

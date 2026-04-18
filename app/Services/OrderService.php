@@ -23,7 +23,8 @@ use Throwable;
 class OrderService
 {
     public function __construct(
-        protected CartService $cartService
+        protected CartService $cartService,
+        protected SettingsService $settingsService,
     ) {}
 
     public function defaultCheckoutData(?User $user): array
@@ -58,6 +59,10 @@ class OrderService
     public function createFromCart(array $checkoutData): CheckoutResult
     {
         $checkoutData['email'] = $this->normalizeEmail($checkoutData['email'] ?? '');
+
+        if (! Auth::user() && ! $this->settingsService->guestCheckoutEnabled()) {
+            throw new DomainException('Please sign in to place an order.');
+        }
 
         $errors = $this->cartService->validateForCheckout();
 

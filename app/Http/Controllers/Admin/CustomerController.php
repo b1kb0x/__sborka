@@ -6,13 +6,14 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdateCustomerRequest;
 use App\Models\User;
+use App\Services\SettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class CustomerController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, SettingsService $settings): View
     {
         $query = User::query()
             ->where('role', 'customer')
@@ -41,7 +42,9 @@ class CustomerController extends Controller
             });
         }
 
-        $customers = $query->paginate(2)->withQueryString();
+        $customers = $query
+            ->paginate($settings->adminCustomersPerPage())
+            ->withQueryString();
 
         return view('admin.customers.index', [
             'customers' => $customers,

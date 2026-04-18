@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\ProductAttribute;
 use App\Models\ProductAttributeValue;
 use App\Services\ProductImageService;
+use App\Services\SettingsService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,11 +18,11 @@ use Illuminate\View\View;
 
 class ProductController extends Controller
 {
-    public function index(): View
+    public function index(SettingsService $settings): View
     {
         $products = Product::query()
             ->latest()
-            ->paginate(2);
+            ->paginate($settings->adminProductsPerPage());
 
         return view('admin.products.index', [
             'products' => $products,

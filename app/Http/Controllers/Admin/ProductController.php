@@ -21,7 +21,7 @@ class ProductController extends Controller
     {
         $products = Product::query()
             ->latest()
-            ->paginate(20);
+            ->paginate(2);
 
         return view('admin.products.index', [
             'products' => $products,

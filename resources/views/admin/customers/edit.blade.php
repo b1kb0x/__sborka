@@ -1,5 +1,12 @@
 @extends('admin.layout.admin')
 
+@section('header')
+    <div class="col">
+        <h2 class="page-title">Edit customer</h2>
+        <div class="text-secondary mt-1">Update customer profile information and account status</div>
+    </div>
+@endsection
+
 @section('content')
     <div class="container">
         <p>

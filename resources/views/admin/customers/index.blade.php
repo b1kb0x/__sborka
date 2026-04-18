@@ -2,9 +2,10 @@
 @extends('admin.layout.admin')
 
 @section('header')
-    <h2 class="page-title">Customer</h2>
-
-
+    <div class="col">
+        <h2 class="page-title">Customers</h2>
+        <div class="text-secondary mt-1">View customer accounts, statuses, and order history</div>
+    </div>
 @endsection
 
 @section('content')

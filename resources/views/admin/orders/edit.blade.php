@@ -1,8 +1,20 @@
 @extends('admin.layout.admin')
 
+@section('header')
+    <div class="col">
+        <h2 class="page-title">Edit order #{{ $order->id }}</h2>
+        <div class="text-secondary mt-1">Update order details and processing status</div>
+    </div>
+
+@endsection
+
 @section('content')
     <div class="container">
-        <h1>Edit order #{{ $order->id }}</h1>
+
+        <p>
+            <a href="{{ route('admin.orders.index') }}" class="text-body-secondary text-decoration-none">‚Üê Back to Orders</a>
+        </p>
+
 
         @if(session('success'))
             <div style="margin-bottom:15px; padding:10px; border:1px solid green;">
@@ -20,7 +32,7 @@
             <p><strong>Region:</strong> {{ $order->region }}</p>
             <p><strong>City:</strong> {{ $order->city }}</p>
             <p><strong>Address:</strong> {{ $order->address }}</p>
-            <p><strong>Comment:</strong> {{ $order->comment ?: 'ó' }}</p>
+            <p><strong>Comment:</strong> {{ $order->comment ?: 'ÔøΩ' }}</p>
         </div>
 
         <form action="{{ route('admin.orders.update', $order) }}" method="POST">

@@ -1,8 +1,17 @@
 @extends('admin.layout.admin')
 
+@section('header')
+    <div class="col">
+        <h2 class="page-title">Edit product</h2>
+        <div class="text-secondary mt-1">Edit product details and status</div>
+    </div>
+@endsection
+
 @section('content')
     <div class="container">
-        <h1>Редактировать товар</h1>
+        <p>
+            <a href="{{ route('admin.product-attributes.index') }}" class="text-body-secondary text-decoration-none">← Back to Products</a>
+        </p>
 
         <form action="{{ route('admin.products.update', $product) }}" method="POST">
             @csrf

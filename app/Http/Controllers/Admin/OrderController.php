@@ -32,7 +32,7 @@ class OrderController extends Controller
             }
         }
 
-        $orders = $query->paginate(20)->withQueryString();
+        $orders = $query->paginate(10)->withQueryString();
 
         return view('admin.orders.index', [
             'orders' => $orders,

@@ -17,6 +17,7 @@ class CustomerController extends Controller
         $query = User::query()
             ->where('role', 'customer')
             ->withCount('orders')
+            ->withMax('orders as last_order_at', 'created_at')
             ->latest();
 
         if ($request->filled('status')) {
@@ -25,14 +26,22 @@ class CustomerController extends Controller
 
         if ($request->filled('search')) {
             $search = trim($request->string('search')->value());
+            $normalizedPhone = preg_replace('/\D+/', '', $search);
 
-            $query->where(function ($q) use ($search): void {
+            $query->where(function ($q) use ($search, $normalizedPhone): void {
                 $q->where('name', 'like', "%{$search}%")
                     ->orWhere('email', 'like', "%{$search}%");
+
+                if ($normalizedPhone !== '') {
+                    $q->orWhereRaw(
+                        "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(phone, '+', ''), ' ', ''), '-', ''), '(', ''), ')', '') LIKE ?",
+                        ["%{$normalizedPhone}%"]
+                    );
+                }
             });
         }
 
-        $customers = $query->paginate(20)->withQueryString();
+        $customers = $query->paginate(2)->withQueryString();
 
         return view('admin.customers.index', [
             'customers' => $customers,
@@ -43,11 +52,11 @@ class CustomerController extends Controller
         ]);
     }
 
-    public function show(User $customer): View
+    public function edit(User $customer): View
     {
         abort_unless($customer->role === UserRole::Customer, 404);
 
-        return view('admin.customers.show', [
+        return view('admin.customers.edit', [
             'customer' => $customer,
         ]);
     }
@@ -66,7 +75,7 @@ class CustomerController extends Controller
         $customer->update($validated);
 
         return redirect()
-            ->route('admin.customers.show', $customer)
+            ->route('admin.customers.edit', $customer)
             ->with('success', 'Покупатель обновлён.');
     }
 

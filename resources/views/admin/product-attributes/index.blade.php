@@ -2,78 +2,79 @@
 
 @section('content')
     <div class="container">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h1>Характеристики</h1>
-            <a href="{{ route('admin.product-attributes.create') }}">Создать характеристику</a>
+
+    {{--@include('admin.components.top', ['title' => 'Attributes', 'link' => route('admin.product-attributes.create'), 'button_title' => 'Create'])--}}
+
+    @if(session('success'))
+        <div style="margin-bottom:15px; padding:10px; border:1px solid green;">
+            {{ session('success') }}
         </div>
+    @endif
 
-        @if(session('success'))
-            <div style="margin-bottom:15px; padding:10px; border:1px solid green;">
-                {{ session('success') }}
-            </div>
-        @endif
+    @if(session('error'))
+        <div style="margin-bottom:15px; padding:10px; border:1px solid red;">
+            {{ session('error') }}
+        </div>
+    @endif
 
-        @if(session('error'))
-            <div style="margin-bottom:15px; padding:10px; border:1px solid red;">
-                {{ session('error') }}
-            </div>
-        @endif
+    @if($attributes->isEmpty())
+        <p>Характеристик пока нет.</p>
+    @else
 
-        @if($attributes->isEmpty())
-            <p>Характеристик пока нет.</p>
-        @else
-            <table border="1" cellpadding="10" cellspacing="0" width="100%">
-                <thead>
+        <table class="table align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Slug</th>
+                <th>Type</th>
+                <th>Group</th>
+                <th>Sort</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach($attributes as $attribute)
                 <tr>
-                    <th>ID</th>
-                    <th>Название</th>
-                    <th>Slug</th>
-                    <th>Тип</th>
-                    <th>Группа</th>
-                    <th>Сортировка</th>
-                    <th>Видима</th>
-                    <th>Действия</th>
-                </tr>
-                </thead>
-                <tbody>
-                @foreach($attributes as $attribute)
-                    <tr>
-                        <td>{{ $attribute->id }}</td>
-                        <td>{{ $attribute->name }}</td>
-                        <td>{{ $attribute->slug }}</td>
-                        <td>{{ $attribute->type }}</td>
-                        <td>{{ $attribute->display_group ?: '—' }}</td>
-                        <td>{{ $attribute->sort_order }}</td>
-                        <td>{{ $attribute->is_visible ? 'Да' : 'Нет' }}</td>
-                        <td>
-                            @if($attribute->type === 'select')
-                                <a href="{{ route('admin.product-attributes.options.index', $attribute) }}">
-                                    Опции
-                                </a>
-                                |
-                            @endif
-
-                            <a href="{{ route('admin.product-attributes.edit', $attribute) }}">
-                                Редактировать
+                    <td>{{ $attribute->id }}</td>
+                    <td>{{ $attribute->name }}</td>
+                    <td>{{ $attribute->slug }}</td>
+                    <td>{{ $attribute->type }}</td>
+                    <td>{{ $attribute->display_group ?: '—' }}</td>
+                    <td>{{ $attribute->sort_order }}</td>
+                    <td><span class="chip {{ $attribute->is_visible ? 'chip-success' : 'chip-danger' }}">
+                            {{ $attribute->is_visible ? 'Visible' : 'Hidden' }}</span></td>
+                    <td>
+                        <div class="d-flex justify-content-end gap-2">
+                        @if($attribute->type === 'select')
+                            <a href="{{ route('admin.product-attributes.options.index', $attribute) }}" class="btn btn-outline-success btn-sm">
+                                Options
                             </a>
+                        @endif
 
-                            <form action="{{ route('admin.product-attributes.destroy', $attribute) }}"
-                                  method="POST"
-                                  style="display:inline-block;"
-                                  onsubmit="return confirm('Удалить характеристику?')">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit">Удалить</button>
-                            </form>
-                        </td>
-                    </tr>
-                @endforeach
-                </tbody>
-            </table>
+                        <a href="{{ route('admin.product-attributes.edit', $attribute) }}" class="btn btn-outline-primary btn-sm">
+                            Edit
+                        </a>
 
-            <div style="margin-top:20px;">
-                {{ $attributes->links() }}
-            </div>
-        @endif
-    </div>
+                        <form action="{{ route('admin.product-attributes.destroy', $attribute) }}"
+                              method="POST"
+                              style="display:inline-block;"
+                              onsubmit="return confirm('Удалить характеристику?')">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+                        </form>
+                        </div>
+                    </td>
+                </tr>
+            @endforeach
+            </tbody>
+        </table>
+
+        <div class="mt-4">
+            {{ $attributes->links() }}
+        </div>
+    @endif
+</div>
 @endsection

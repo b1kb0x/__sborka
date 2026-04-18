@@ -2,10 +2,7 @@
 
 @section('content')
         <div class="container">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h1>Товары</h1>
-                <a href="{{ route('admin.products.create') }}">Создать товар</a>
-            </div>
+            {{--@include('admin.components.top', ['title' => 'Products', 'link' => route('admin.products.create'), 'button_title' => 'Create'])--}}
 
             @if(session('success'))
                 <div style="margin-bottom:15px; padding:10px; border:1px solid green;">
@@ -16,14 +13,15 @@
             @if($products->isEmpty())
                 <p>Товаров нет.</p>
             @else
-                <table border="1" cellpadding="10" cellspacing="0" width="100%">
-                    <thead>
+
+                <table class="table align-middle">
+                    <thead class="table-light">
                     <tr>
                         <th>ID</th>
-                        <th>Название</th>
-                        <th>Slug</th>
-                        <th>Активен</th>
-                        <th>Действия</th>
+                        <th>Name</th>
+                        <th>Qty</th>
+                        <th>Status</th>
+                        <th class="w-25"></th>
                     </tr>
                     </thead>
                     <tbody>
@@ -31,10 +29,12 @@
                         <tr>
                             <td>{{ $product->id }}</td>
                             <td>{{ $product->title }}</td>
-                            <td>{{ $product->slug }}</td>
-                            <td>{{ $product->is_active ? 'Да' : 'Нет' }}</td>
+                            <td>{{ $product->stock }}</td>
+                            <td><span class="chip {{ $product->is_active ? 'chip-success' : 'chip-danger' }}">
+                                {{ $product->is_active ? 'Publish' : 'Inactive' }}</span></td>
                             <td>
-                                <a href="{{ route('admin.products.edit', $product) }}">Редактировать</a>
+                                <div class="d-flex justify-content-end gap-2">
+                                <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-outline-primary btn-sm">Edit</a>
 
                                 <form action="{{ route('admin.products.destroy', $product) }}"
                                       method="POST"
@@ -42,8 +42,9 @@
                                       onsubmit="return confirm('Удалить товар?')">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit">Удалить</button>
+                                    <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
                                 </form>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

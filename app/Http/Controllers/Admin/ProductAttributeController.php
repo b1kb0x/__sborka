@@ -17,7 +17,7 @@ class ProductAttributeController extends Controller
         $attributes = ProductAttribute::query()
             ->orderBy('sort_order')
             ->orderBy('id')
-            ->paginate(20);
+            ->paginate(8);
 
         return view('admin.product-attributes.index', [
             'attributes' => $attributes,

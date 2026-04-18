@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductAttributeController as AdminProductAttributeController;
@@ -38,12 +39,14 @@ Route::middleware(['auth', 'active.user', 'admin'])->group(function () {
     })->name('admin.dashboard');
 
     Route::prefix('admin')->name('admin.')->group(function () {
+        Route::get('/admin', [DashboardController::class, 'index'])->name('admin.dashboard');
+
         Route::resource('products', AdminProductController::class)->except(['show']);
         Route::resource('product-attributes', AdminProductAttributeController::class)->except(['show']);
         Route::resource('orders', AdminOrderController::class)->only(['index', 'edit', 'update']);
 
         Route::get('customers', [AdminCustomerController::class, 'index'])->name('customers.index');
-        Route::get('customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
+        Route::get('customers/{customer}', [AdminCustomerController::class, 'edit'])->name('customers.edit');
         Route::put('customers/{customer}', [AdminCustomerController::class, 'update'])->name('customers.update');
 
         Route::prefix('product-attributes/{productAttribute}/options')

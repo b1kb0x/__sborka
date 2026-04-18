@@ -82,16 +82,14 @@
                         Alt: {{ $product->primaryImage->alt ?? '—' }}
                     </div>
 
-                    <div class="mt-3">
-                        <button
-                            type="submit"
-                            form="delete-product-image-form"
-                            class="btn btn-outline-danger"
-                            onclick="return confirm('Удалить фото?')"
-                        >
-                            Удалить фото
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        form="delete-product-image-form"
+                        class="btn btn-outline-danger"
+                        onclick="return confirm('Удалить фото?')"
+                    >
+                        Удалить фото
+                    </button>
                 </div>
             @else
                 <label for="image" id="product-image-drop" class="product-dropzone @error('image') is-invalid @enderror">

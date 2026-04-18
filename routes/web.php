@@ -6,6 +6,9 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductAttributeController as AdminProductAttributeController;
 use App\Http\Controllers\Admin\ProductAttributeOptionController as AdminProductAttributeOptionController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
+use App\Http\Controllers\Admin\Settings\AdminSettingsController;
+use App\Http\Controllers\Admin\Settings\CheckoutSettingsController;
+use App\Http\Controllers\Admin\Settings\GeneralSettingsController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CustomerCabinetController;
 use App\Http\Controllers\OrderController;
@@ -60,6 +63,19 @@ Route::middleware(['auth', 'active.user', 'admin'])->group(function () {
         Route::post('products/{product}/image', [AdminProductController::class, 'uploadImage'])->name('products.image.store');
         Route::put('products/{product}/image', [AdminProductController::class, 'replaceImage'])->name('products.image.replace');
         Route::delete('products/{product}/image', [AdminProductController::class, 'deleteImage'])->name('products.image.destroy');
+
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::redirect('/', '/admin/settings/general')->name('index');
+
+            Route::get('/general', [GeneralSettingsController::class, 'edit'])->name('general.edit');
+            Route::put('/general', [GeneralSettingsController::class, 'update'])->name('general.update');
+
+            Route::get('/checkout', [CheckoutSettingsController::class, 'edit'])->name('checkout.edit');
+            Route::put('/checkout', [CheckoutSettingsController::class, 'update'])->name('checkout.update');
+
+            Route::get('/admin', [AdminSettingsController::class, 'edit'])->name('admin.edit');
+            Route::put('/admin', [AdminSettingsController::class, 'update'])->name('admin.update');
+        });
     });
 });
 

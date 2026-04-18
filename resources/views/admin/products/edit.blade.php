@@ -29,4 +29,14 @@
 
         <button type="submit" class="btn btn-outline-primary">Обновить</button>
     </form>
+
+    <form
+        id="delete-product-image-form"
+        action="{{ route('admin.products.image.destroy', $product) }}"
+        method="POST"
+        class="d-none"
+    >
+        @csrf
+        @method('DELETE')
+    </form>
 @endsection

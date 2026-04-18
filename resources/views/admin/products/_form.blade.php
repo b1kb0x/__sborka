@@ -69,52 +69,65 @@
         <div class="mb-3">
             <label class="form-label">Изображение</label>
 
-            <label for="image" id="product-image-drop" class="product-dropzone @error('image') is-invalid @enderror">
+            @if($product?->primaryImage)
+                <div class="mb-3">
+                    <img
+                        src="{{ $product->primaryImage->preview_url }}"
+                        alt="{{ $product->primaryImage->alt ?? $product->title }}"
+                        class="img-fluid rounded border"
+                        style="max-width: 300px;"
+                    >
 
-                @if($product?->primaryImage)
-                    <div class="mb-3">
-                        <img
-                            src="{{ $product->primaryImage->preview_url }}"
-                            alt="{{ $product->primaryImage->alt ?? $product->title }}"
-                            class="img-fluid rounded border"
-                            style="max-width: 300px;"
-                        >
-
-                        <div class="text-secondary mt-2">
-                            Alt: {{ $product->primaryImage->alt ?? '—' }}
-                        </div>
-
-                        <div class="mt-3">
-                            <button
-                                type="submit"
-                                form="delete-product-image-form"
-                                class="btn btn-outline-danger"
-                                onclick="return confirm('Удалить фото?')"
-                            >
-                                Удалить фото
-                            </button>
-                        </div>
+                    <div class="text-secondary mt-2">
+                        Alt: {{ $product->primaryImage->alt ?? '—' }}
                     </div>
-                @endif
 
-                <div class="product-dropzone-inner">
-                    <h3 class="product-dropzone-title mb-2">Drop files here to upload</h3>
-                    <div class="text-secondary">or click to browse</div>
-                    <div id="product-image-name" class="text-secondary mt-2 d-none"></div>
+                    <div class="mt-3">
+                        <button
+                            type="submit"
+                            form="delete-product-image-form"
+                            class="btn btn-outline-danger"
+                            onclick="return confirm('Удалить фото?')"
+                        >
+                            Удалить фото
+                        </button>
+                    </div>
                 </div>
+            @else
+                <label for="image" id="product-image-drop" class="product-dropzone @error('image') is-invalid @enderror">
+                    <div class="product-dropzone-inner">
+                        <h3 class="product-dropzone-title mb-2">Drop files here to upload</h3>
+                        <div class="text-secondary">or click to browse</div>
+                        <div id="product-image-name" class="text-secondary mt-2 d-none"></div>
+                    </div>
 
-                <input
-                    id="image"
-                    type="file"
-                    name="image"
-                    class="d-none"
-                    accept=".jpg,.jpeg,.png,.webp,image/*"
-                >
-            </label>
+                    <input
+                        id="image"
+                        type="file"
+                        name="image"
+                        class="d-none"
+                        accept=".jpg,.jpeg,.png,.webp,image/*"
+                    >
+                </label>
 
-            @error('image')
-            <div class="invalid-feedback d-block">{{ $message }}</div>
-            @enderror
+                @error('image')
+                <div class="invalid-feedback d-block">{{ $message }}</div>
+                @enderror
+
+                <div class="mt-3">
+                    <label for="alt" class="form-label">Alt</label>
+                    <input
+                        id="alt"
+                        type="text"
+                        name="alt"
+                        value="{{ old('alt') }}"
+                        class="form-control @error('alt') is-invalid @enderror"
+                    >
+                    @error('alt')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            @endif
         </div>
 
         @push('scripts')

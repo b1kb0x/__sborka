@@ -91,7 +91,11 @@ class ProductController extends Controller
         ]);
     }
 
-    public function update(UpdateProductRequest $request, Product $product): RedirectResponse
+    public function update(
+        UpdateProductRequest $request,
+        Product $product,
+        ProductImageService $service
+    ): RedirectResponse
     {
         $data = $request->validated();
 
@@ -103,9 +107,24 @@ class ProductController extends Controller
 
         DB::transaction(function () use ($request, $product, $data): void {
             $product->update($data);
-
             $this->syncAttributeValues($product, $request->input('attributes', []));
         });
+
+        if ($request->hasFile('image')) {
+            if ($product->primaryImage()->exists()) {
+                $service->replace(
+                    $product->primaryImage()->firstOrFail(),
+                    $request->file('image'),
+                    $request->input('alt')
+                );
+            } else {
+                $service->uploadPrimary(
+                    $product,
+                    $request->file('image'),
+                    $request->input('alt')
+                );
+            }
+        }
 
         return redirect()
             ->route('admin.products.index')

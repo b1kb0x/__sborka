@@ -13,7 +13,17 @@ return new class extends Migration
     {
         Schema::create('delivery_regions', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('delivery_service_id')
+                ->constrained('delivery_services')
+                ->cascadeOnDelete();
+
+            $table->string('name');
+            $table->string('external_id')->nullable();
+
             $table->timestamps();
+
+            $table->unique(['delivery_service_id', 'name']);
+            $table->unique(['delivery_service_id', 'external_id']);
         });
     }
 

@@ -8,13 +8,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class DeliveryBranch extends Model
 {
     protected $fillable = [
-    'delivery_city_id',
-    'name',
-    'address',
-    'postal_code',
-    'external_id',
-    'is_active',
-];
+        'delivery_city_id',
+        'name',
+        'address',
+        'postal_code',
+        'type',
+        'external_id',
+        'is_active',
+    ];
 
     protected $casts = [
         'is_active' => 'boolean',

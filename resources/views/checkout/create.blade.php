@@ -135,56 +135,19 @@
 
                         <div>
                             <label for="delivery_branch_id">Branch</label>
-                            <div style="position:relative;" x-on:click.outside="branchDropdownOpen = false">
-                                <input
-                                    id="delivery_branch_id"
-                                    type="text"
-                                    x-model="branchQuery"
-                                    x-on:focus="openBranchDropdown()"
-                                    x-on:click="openBranchDropdown()"
-                                    x-on:input="onBranchInput()"
-                                    :disabled="branchSearchDisabled()"
-                                    :placeholder="branchSearchPlaceholder()"
-                                    aria-invalid="{{ $errors->has('delivery_branch_id') ? 'true' : 'false' }}"
-                                    autocomplete="off"
-                                    style="width:100%; border:1px solid {{ $errors->has('delivery_branch_id') ? '#dc3545' : '#ced4da' }};"
-                                >
-                                <input type="hidden" name="delivery_branch_id" :value="selectedBranch">
-
-                                <div
-                                    x-show="branchDropdownOpen"
-                                    x-cloak
-                                    style="position:absolute; top:calc(100% + 4px); left:0; right:0; z-index:20; background:#fff; border:1px solid #ced4da; border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.08); max-height:260px; overflow:auto;"
-                                >
-                                    <template x-if="!selectedCity">
-                                        <div style="padding:10px 12px; color:#6c757d;">Select city first</div>
-                                    </template>
-
-                                    <template x-if="selectedCity && loadingBranches">
-                                        <div style="padding:10px 12px; color:#6c757d;">Loading branches...</div>
-                                    </template>
-
-                                    <template x-if="selectedCity && !loadingBranches && !branches.length">
-                                        <div style="padding:10px 12px; color:#6c757d;">No branches available</div>
-                                    </template>
-
-                                    <template x-if="selectedCity && !loadingBranches && branches.length && !filteredBranches().length">
-                                        <div style="padding:10px 12px; color:#6c757d;">No matching branches found</div>
-                                    </template>
-
-                                    <template x-if="selectedCity && !loadingBranches && filteredBranches().length">
-                                        <template x-for="branch in filteredBranches()" :key="branch.id">
-                                            <button
-                                                type="button"
-                                                x-on:click="selectBranch(branch)"
-                                                style="display:block; width:100%; text-align:left; padding:10px 12px; border:0; background:#fff; cursor:pointer;"
-                                            >
-                                                <span x-text="formatBranchSearchLabel(branch)"></span>
-                                            </button>
-                                        </template>
-                                    </template>
-                                </div>
-                            </div>
+                            <select
+                                id="delivery_branch_id"
+                                name="delivery_branch_id"
+                                x-model="selectedBranch"
+                                :disabled="!selectedCity || loadingBranches"
+                                aria-invalid="{{ $errors->has('delivery_branch_id') ? 'true' : 'false' }}"
+                                style="width:100%; border:1px solid {{ $errors->has('delivery_branch_id') ? '#dc3545' : '#ced4da' }};"
+                            >
+                                <option value="" x-text="branchPlaceholder()"></option>
+                                <template x-for="branch in branches" :key="branch.id">
+                                    <option :value="String(branch.id)" x-text="branch.name"></option>
+                                </template>
+                            </select>
                             @error('delivery_branch_id')
                                 <div style="color:#dc3545; margin-top:6px;">{{ $message }}</div>
                             @enderror
@@ -279,8 +242,6 @@
                 selectedRegion: '{{ old('delivery_region_id', '') }}',
                 selectedCity: '{{ old('delivery_city_id', '') }}',
                 selectedBranch: '{{ old('delivery_branch_id', '') }}',
-                branchQuery: '',
-                branchDropdownOpen: false,
                 loadingServices: false,
                 loadingRegions: false,
                 loadingCities: false,
@@ -337,11 +298,10 @@
                 async onServiceChange() {
                     this.selectedRegion = '';
                     this.selectedCity = '';
+                    this.selectedBranch = '';
                     this.regions = [];
                     this.cities = [];
-                    this.clearBranchSelection();
                     this.branches = [];
-                    this.branchDropdownOpen = false;
 
                     if (!this.selectedService) {
                         return;
@@ -383,9 +343,8 @@
                         this.selectedRegion = '';
                         this.cities = [];
                         this.selectedCity = '';
-                        this.clearBranchSelection();
+                        this.selectedBranch = '';
                         this.branches = [];
-                        this.branchDropdownOpen = false;
                         console.error(error);
                     } finally {
                         if (requestToken === this.regionsRequestToken && serviceId === this.selectedService) {
@@ -396,10 +355,9 @@
 
                 async onRegionChange() {
                     this.selectedCity = '';
+                    this.selectedBranch = '';
                     this.cities = [];
-                    this.clearBranchSelection();
                     this.branches = [];
-                    this.branchDropdownOpen = false;
 
                     if (!this.selectedRegion) {
                         return;
@@ -439,9 +397,8 @@
 
                         this.cities = [];
                         this.selectedCity = '';
-                        this.clearBranchSelection();
+                        this.selectedBranch = '';
                         this.branches = [];
-                        this.branchDropdownOpen = false;
                         console.error(error);
                     } finally {
                         if (requestToken === this.citiesRequestToken && regionId === this.selectedRegion) {
@@ -451,9 +408,8 @@
                 },
 
                 async onCityChange() {
-                    this.clearBranchSelection();
+                    this.selectedBranch = '';
                     this.branches = [];
-                    this.branchDropdownOpen = false;
 
                     if (!this.selectedCity) {
                         return;
@@ -486,15 +442,13 @@
                         }
 
                         this.branches = branches;
-                        this.syncBranchQueryFromSelectedBranch();
                     } catch (error) {
                         if (requestToken !== this.branchesRequestToken || cityId !== this.selectedCity) {
                             return;
                         }
 
                         this.branches = [];
-                        this.clearBranchSelection();
-                        this.branchDropdownOpen = false;
+                        this.selectedBranch = '';
                         console.error(error);
                     } finally {
                         if (requestToken === this.branchesRequestToken && cityId === this.selectedCity) {
@@ -547,7 +501,7 @@
                     return 'Select city';
                 },
 
-                branchSearchPlaceholder() {
+                branchPlaceholder() {
                     if (! this.selectedCity) {
                         return 'Select city first';
                     }
@@ -560,86 +514,13 @@
                         return 'No branches available';
                     }
 
-                    return 'Search branch by number, address or postal code';
+                    return 'Select branch';
                 },
 
                 formatBranchLabel(branch) {
                     return branch.address
                         ? `${branch.name} (${branch.address})`
                         : branch.name;
-                },
-
-                formatBranchSearchLabel(branch) {
-                    if (branch.postal_code) {
-                        return `${branch.name} (${branch.postal_code})`;
-                    }
-
-                    return branch.name;
-                },
-
-                branchSearchDisabled() {
-                    return ! this.selectedCity || this.loadingBranches || ! this.branches.length;
-                },
-
-                openBranchDropdown() {
-                    if (! this.selectedCity || this.loadingBranches) {
-                        return;
-                    }
-
-                    this.branchDropdownOpen = true;
-                },
-
-                onBranchInput() {
-                    const selectedBranch = this.selectedBranchOption();
-
-                    if (selectedBranch && this.branchQuery !== this.formatBranchSearchLabel(selectedBranch)) {
-                        this.selectedBranch = '';
-                    }
-
-                    this.branchDropdownOpen = true;
-                },
-
-                filteredBranches() {
-                    const query = this.branchQuery.trim().toLowerCase();
-
-                    if (! query) {
-                        return this.branches.slice(0, 50);
-                    }
-
-                    return this.branches.filter((branch) => {
-                        const haystack = [
-                            branch.name,
-                            branch.address,
-                            branch.postal_code,
-                        ]
-                            .filter(Boolean)
-                            .join(' ')
-                            .toLowerCase();
-
-                        return haystack.includes(query);
-                    }).slice(0, 50);
-                },
-
-                selectBranch(branch) {
-                    this.selectedBranch = String(branch.id);
-                    this.branchQuery = this.formatBranchSearchLabel(branch);
-                    this.branchDropdownOpen = false;
-                },
-
-                clearBranchSelection() {
-                    this.selectedBranch = '';
-                    this.branchQuery = '';
-                },
-
-                syncBranchQueryFromSelectedBranch() {
-                    const branch = this.selectedBranchOption();
-
-                    if (! branch) {
-                        this.clearBranchSelection();
-                        return;
-                    }
-
-                    this.branchQuery = this.formatBranchSearchLabel(branch);
                 },
 
                 selectedServiceOption() {

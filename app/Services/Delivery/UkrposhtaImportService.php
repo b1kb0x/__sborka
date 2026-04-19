@@ -86,6 +86,7 @@ class UkrposhtaImportService
                 ],
                 [
                     'address' => $branchAddress,
+                    'type' => 'branch',
                     'is_active' => true,
                 ]
             );

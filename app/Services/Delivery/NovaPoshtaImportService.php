@@ -12,6 +12,10 @@ use RuntimeException;
 
 class NovaPoshtaImportService
 {
+    protected const WAREHOUSES_PAGE_LIMIT = 500;
+
+    protected const MAX_WAREHOUSE_PAGES = 1000;
+
     public function sync(): array
     {
         $apiKey = trim((string) config('services.nova_poshta.api_key'));
@@ -147,57 +151,82 @@ class NovaPoshtaImportService
 
     protected function syncBranches(array $citiesByRef, array &$stats): void
     {
-        foreach ($this->request('Address', 'getWarehouses') as $branchData) {
-            $branchRef = $this->stringValue($branchData, ['Ref']);
-            $cityRef = $this->stringValue($branchData, ['CityRef', 'SettlementRef']);
-            $branchNumber = $this->stringValue($branchData, ['Number', 'SiteKey']);
-            $branchAddress = $this->stringValue($branchData, ['ShortAddress', 'Description', 'DescriptionRu']);
+        for ($page = 1; $page <= self::MAX_WAREHOUSE_PAGES; $page++) {
+            $branchPage = $this->request('Address', 'getWarehouses', [
+                'Page' => $page,
+                'Limit' => self::WAREHOUSES_PAGE_LIMIT,
+            ]);
 
-            $city = $cityRef ? ($citiesByRef[$cityRef] ?? null) : null;
-
-            if (! $city || ! $branchNumber || ! $branchAddress) {
-                $stats['skipped']++;
-                continue;
+            if ($branchPage === []) {
+                return;
             }
 
-            $branchName = sprintf("\u{2116}%s, %s", $branchNumber, $branchAddress);
+            foreach ($branchPage as $branchData) {
+                $branchRef = $this->stringValue($branchData, ['Ref']);
+                $cityRef = $this->stringValue($branchData, ['CityRef', 'SettlementRef']);
+                $branchNumber = $this->stringValue($branchData, ['Number', 'SiteKey']);
+                $branchAddress = $this->stringValue($branchData, ['ShortAddress', 'ShortAddressRu', 'Description', 'DescriptionRu']);
+                $branchType = $this->resolveBranchType($branchData);
 
-            $branch = DeliveryBranch::query()
-                ->where('delivery_city_id', $city->id)
-                ->when(
-                    $branchRef,
-                    fn (Builder $query) => $query->where('external_id', $branchRef),
-                    fn (Builder $query) => $query->where('name', $branchName)
-                )
-                ->first() ?? new DeliveryBranch();
+                $city = $cityRef ? ($citiesByRef[$cityRef] ?? null) : null;
 
-            $created = ! $branch->exists;
+                if (! $city || ! $branchNumber || ! $branchAddress) {
+                    $stats['skipped']++;
+                    continue;
+                }
 
-            $branch->delivery_city_id = $city->id;
-            $branch->name = $branchName;
-            $branch->address = $branchAddress;
-            $branch->postal_code = null;
-            $branch->external_id = $branchRef;
-            $branch->is_active = true;
+                $branchName = $this->buildBranchDisplayName(
+                    $branchType,
+                    $branchNumber,
+                    $branchAddress,
+                    $this->extractWeightSuffix($branchData)
+                );
 
-            if ($created) {
-                $branch->save();
-                $stats['branches_created']++;
-            } elseif ($branch->isDirty()) {
-                $branch->save();
-                $stats['branches_updated']++;
+                $branch = DeliveryBranch::query()
+                    ->where('delivery_city_id', $city->id)
+                    ->when(
+                        $branchRef,
+                        fn (Builder $query) => $query->where('external_id', $branchRef),
+                        fn (Builder $query) => $query->where('name', $branchName)
+                    )
+                    ->first() ?? new DeliveryBranch();
+
+                $created = ! $branch->exists;
+
+                $branch->delivery_city_id = $city->id;
+                $branch->name = $branchName;
+                $branch->address = $branchAddress;
+                $branch->postal_code = null;
+                $branch->type = $branchType;
+                $branch->external_id = $branchRef;
+                $branch->is_active = true;
+
+                if ($created) {
+                    $branch->save();
+                    $stats['branches_created']++;
+                } elseif ($branch->isDirty()) {
+                    $branch->save();
+                    $stats['branches_updated']++;
+                }
             }
         }
+
+        throw new RuntimeException('Nova Poshta warehouses sync exceeded the maximum page limit.');
     }
 
     protected function request(string $modelName, string $calledMethod, array $methodProperties = []): array
     {
-        $response = Http::acceptJson()->post(config('services.nova_poshta.base_url'), [
+        $payload = [
             'apiKey' => config('services.nova_poshta.api_key'),
             'modelName' => $modelName,
             'calledMethod' => $calledMethod,
-            'methodProperties' => $methodProperties,
-        ]);
+        ];
+
+        if ($methodProperties !== []) {
+            $payload['methodProperties'] = $methodProperties;
+        }
+
+        $response = Http::acceptJson()->post(config('services.nova_poshta.base_url'), $payload);
 
         if (! $response->successful()) {
             throw new RuntimeException("Nova Poshta API request failed for {$calledMethod}.");
@@ -206,9 +235,13 @@ class NovaPoshtaImportService
         $payload = $response->json();
 
         if (! is_array($payload) || ! ($payload['success'] ?? false)) {
-            $errors = $payload['errors'] ?? ['Unknown Nova Poshta API error.'];
+            $messages = array_filter([
+                ...($payload['errors'] ?? []),
+                ...($payload['warnings'] ?? []),
+                ...($payload['info'] ?? []),
+            ]);
 
-            throw new RuntimeException(implode(' ', $errors));
+            throw new RuntimeException(implode(' ', $messages ?: ['Unknown Nova Poshta API error.']));
         }
 
         return is_array($payload['data'] ?? null) ? $payload['data'] : [];
@@ -240,6 +273,67 @@ class NovaPoshtaImportService
 
             if ($value !== '') {
                 return $value;
+            }
+        }
+
+        return null;
+    }
+
+    protected function resolveBranchType(array $branchData): string
+    {
+        $category = $this->stringValue($branchData, ['CategoryOfWarehouse']);
+        $description = $this->stringValue($branchData, ['Description', 'DescriptionRu']);
+
+        if ($category === 'Postomat') {
+            return 'parcel_locker';
+        }
+
+        if ($category === 'Store') {
+            return 'pickup_point';
+        }
+
+        $description = $description ? mb_strtolower($description) : null;
+
+        if ($description && str_contains($description, 'поштомат')) {
+            return 'parcel_locker';
+        }
+
+        if ($description && str_contains($description, 'пункт')) {
+            return 'pickup_point';
+        }
+
+        return 'branch';
+    }
+
+    protected function buildBranchDisplayName(
+        string $branchType,
+        string $branchNumber,
+        string $branchAddress,
+        ?string $weightSuffix
+    ): string
+    {
+        $weight = $weightSuffix ? " {$weightSuffix}" : '';
+
+        return match ($branchType) {
+            'parcel_locker' => "Поштомат \"Нова Пошта\" №{$branchNumber}: {$branchAddress}",
+            'pickup_point' => "Пункт №{$branchNumber}{$weight}: {$branchAddress}",
+            default => "Відділення №{$branchNumber}{$weight}: {$branchAddress}",
+        };
+    }
+
+    protected function extractWeightSuffix(array $branchData): ?string
+    {
+        foreach (['Description', 'DescriptionRu'] as $field) {
+            $description = $this->stringValue($branchData, [$field]);
+
+            if (! $description) {
+                continue;
+            }
+
+            if (preg_match('/\((до\s+\d+\s*кг)\)/ui', $description, $matches) === 1) {
+                $normalized = preg_replace('/\s+/u', ' ', trim($matches[1])) ?? trim($matches[1]);
+
+                return "({$normalized})";
             }
         }
 

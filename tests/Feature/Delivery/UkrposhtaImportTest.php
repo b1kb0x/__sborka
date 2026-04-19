@@ -76,8 +76,10 @@ it('imports ukrposhta data from excel, skips invalid rows, and is idempotent', f
     expect($firstBranch)->not->toBeNull();
     expect($firstBranch->name)->toBe('21001, вул. Соборна, 1');
     expect($firstBranch->postal_code)->toBe('21001');
+    expect($firstBranch->type)->toBe('branch');
     expect($firstBranch->address)->toBe('вул. Соборна, 1');
     expect($secondBranch)->not->toBeNull();
+    expect($secondBranch->type)->toBe('branch');
     expect($secondBranch->name)->toBe('21003, вул. Центральна, 3');
 
     $secondRun = $service->import($filePath);

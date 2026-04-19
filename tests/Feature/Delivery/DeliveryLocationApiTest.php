@@ -10,13 +10,13 @@ uses(RefreshDatabase::class);
 
 it('returns only active delivery services', function () {
     $activeService = DeliveryService::query()->create([
-        'name' => 'Нова пошта',
+        'name' => 'Nova Poshta',
         'code' => 'novaposhta',
         'is_active' => true,
     ]);
 
     DeliveryService::query()->create([
-        'name' => 'Архівна служба',
+        'name' => 'Archived service',
         'code' => 'archived',
         'is_active' => false,
     ]);
@@ -26,32 +26,32 @@ it('returns only active delivery services', function () {
         ->assertExactJson([
             [
                 'id' => $activeService->id,
-                'name' => 'Нова пошта',
+                'name' => 'Nova Poshta',
             ],
         ]);
 });
 
 it('returns regions only for the selected service', function () {
     $service = DeliveryService::query()->create([
-        'name' => 'Укрпошта',
+        'name' => 'Ukrposhta',
         'code' => 'ukrposhta',
         'is_active' => true,
     ]);
 
     $otherService = DeliveryService::query()->create([
-        'name' => 'Нова пошта',
+        'name' => 'Nova Poshta',
         'code' => 'novaposhta',
         'is_active' => true,
     ]);
 
     $region = DeliveryRegion::query()->create([
         'delivery_service_id' => $service->id,
-        'name' => 'Київська',
+        'name' => 'Kyivska',
     ]);
 
     DeliveryRegion::query()->create([
         'delivery_service_id' => $otherService->id,
-        'name' => 'Львівська',
+        'name' => 'Lvivska',
     ]);
 
     $this->getJson(route('delivery.regions', $service))
@@ -59,36 +59,36 @@ it('returns regions only for the selected service', function () {
         ->assertExactJson([
             [
                 'id' => $region->id,
-                'name' => 'Київська',
+                'name' => 'Kyivska',
             ],
         ]);
 });
 
 it('returns cities only for the selected region', function () {
     $service = DeliveryService::query()->create([
-        'name' => 'Укрпошта',
+        'name' => 'Ukrposhta',
         'code' => 'ukrposhta',
         'is_active' => true,
     ]);
 
     $region = DeliveryRegion::query()->create([
         'delivery_service_id' => $service->id,
-        'name' => 'Київська',
+        'name' => 'Kyivska',
     ]);
 
     $otherRegion = DeliveryRegion::query()->create([
         'delivery_service_id' => $service->id,
-        'name' => 'Полтавська',
+        'name' => 'Poltavska',
     ]);
 
     $city = DeliveryCity::query()->create([
         'delivery_region_id' => $region->id,
-        'name' => 'Київ',
+        'name' => 'Kyiv',
     ]);
 
     DeliveryCity::query()->create([
         'delivery_region_id' => $otherRegion->id,
-        'name' => 'Полтава',
+        'name' => 'Poltava',
     ]);
 
     $this->getJson(route('delivery.cities', $region))
@@ -96,46 +96,75 @@ it('returns cities only for the selected region', function () {
         ->assertExactJson([
             [
                 'id' => $city->id,
-                'name' => 'Київ',
+                'name' => 'Kyiv',
             ],
         ]);
 });
 
-it('returns branches only for the selected city', function () {
+it('returns branches only for the selected city in backend sorted order', function () {
     $service = DeliveryService::query()->create([
-        'name' => 'Укрпошта',
-        'code' => 'ukrposhta',
+        'name' => 'Nova Poshta',
+        'code' => 'novaposhta',
         'is_active' => true,
     ]);
 
     $region = DeliveryRegion::query()->create([
         'delivery_service_id' => $service->id,
-        'name' => 'Київська',
+        'name' => 'Kyivska',
     ]);
 
     $city = DeliveryCity::query()->create([
         'delivery_region_id' => $region->id,
-        'name' => 'Київ',
+        'name' => 'Kyiv',
     ]);
 
     $otherCity = DeliveryCity::query()->create([
         'delivery_region_id' => $region->id,
-        'name' => 'Бровари',
+        'name' => 'Brovary',
     ]);
 
-    $branch = DeliveryBranch::query()->create([
+    $branchTen = DeliveryBranch::query()->create([
         'delivery_city_id' => $city->id,
-        'name' => 'Київ 1',
-        'address' => 'Вул. Хрещатик, 1',
-        'postal_code' => '01001',
+        'name' => 'Відділення №10',
+        'address' => 'Branch street 10',
+        'postal_code' => null,
+        'type' => 'branch',
+        'is_active' => true,
+    ]);
+
+    $branchTwo = DeliveryBranch::query()->create([
+        'delivery_city_id' => $city->id,
+        'name' => 'Відділення №2',
+        'address' => 'Branch street 2',
+        'postal_code' => null,
+        'type' => 'branch',
+        'is_active' => true,
+    ]);
+
+    $locker = DeliveryBranch::query()->create([
+        'delivery_city_id' => $city->id,
+        'name' => 'Поштомат №145',
+        'address' => 'Locker street 145',
+        'postal_code' => null,
+        'type' => 'parcel_locker',
+        'is_active' => true,
+    ]);
+
+    $pickup = DeliveryBranch::query()->create([
+        'delivery_city_id' => $city->id,
+        'name' => 'Пункт видачі №3',
+        'address' => 'Pickup street 3',
+        'postal_code' => null,
+        'type' => 'pickup_point',
         'is_active' => true,
     ]);
 
     DeliveryBranch::query()->create([
         'delivery_city_id' => $otherCity->id,
-        'name' => 'Бровари 1',
-        'address' => 'Вул. Київська, 1',
-        'postal_code' => '07400',
+        'name' => 'Відділення №1',
+        'address' => 'Other city branch',
+        'postal_code' => null,
+        'type' => 'branch',
         'is_active' => true,
     ]);
 
@@ -143,44 +172,64 @@ it('returns branches only for the selected city', function () {
         ->assertOk()
         ->assertExactJson([
             [
-                'id' => $branch->id,
-                'name' => 'Київ 1',
-                'address' => 'Вул. Хрещатик, 1',
-                'postal_code' => '01001',
+                'id' => $branchTwo->id,
+                'name' => 'Відділення №2',
+                'address' => 'Branch street 2',
+                'postal_code' => null,
+            ],
+            [
+                'id' => $branchTen->id,
+                'name' => 'Відділення №10',
+                'address' => 'Branch street 10',
+                'postal_code' => null,
+            ],
+            [
+                'id' => $locker->id,
+                'name' => 'Поштомат №145',
+                'address' => 'Locker street 145',
+                'postal_code' => null,
+            ],
+            [
+                'id' => $pickup->id,
+                'name' => 'Пункт видачі №3',
+                'address' => 'Pickup street 3',
+                'postal_code' => null,
             ],
         ]);
 });
 
 it('excludes inactive branches from the selected city', function () {
     $service = DeliveryService::query()->create([
-        'name' => 'Укрпошта',
+        'name' => 'Ukrposhta',
         'code' => 'ukrposhta',
         'is_active' => true,
     ]);
 
     $region = DeliveryRegion::query()->create([
         'delivery_service_id' => $service->id,
-        'name' => 'Київська',
+        'name' => 'Kyivska',
     ]);
 
     $city = DeliveryCity::query()->create([
         'delivery_region_id' => $region->id,
-        'name' => 'Київ',
+        'name' => 'Kyiv',
     ]);
 
     $activeBranch = DeliveryBranch::query()->create([
         'delivery_city_id' => $city->id,
-        'name' => 'Київ 1',
-        'address' => 'Вул. Хрещатик, 1',
+        'name' => '01001, Khreshchatyk 1',
+        'address' => 'Khreshchatyk 1',
         'postal_code' => '01001',
+        'type' => 'branch',
         'is_active' => true,
     ]);
 
     DeliveryBranch::query()->create([
         'delivery_city_id' => $city->id,
-        'name' => 'Київ 2',
-        'address' => 'Вул. Хрещатик, 2',
+        'name' => '01002, Khreshchatyk 2',
+        'address' => 'Khreshchatyk 2',
         'postal_code' => '01002',
+        'type' => 'branch',
         'is_active' => false,
     ]);
 
@@ -189,8 +238,8 @@ it('excludes inactive branches from the selected city', function () {
         ->assertExactJson([
             [
                 'id' => $activeBranch->id,
-                'name' => 'Київ 1',
-                'address' => 'Вул. Хрещатик, 1',
+                'name' => '01001, Khreshchatyk 1',
+                'address' => 'Khreshchatyk 1',
                 'postal_code' => '01001',
             ],
         ]);

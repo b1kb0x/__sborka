@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\Settings\CheckoutSettingsController;
 use App\Http\Controllers\Admin\Settings\GeneralSettingsController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CustomerCabinetController;
+use App\Http\Controllers\Delivery\DeliveryLocationController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +23,13 @@ Route::get('/', function () {
 
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
+
+Route::prefix('delivery')->name('delivery.')->group(function () {
+    Route::get('/services', [DeliveryLocationController::class, 'services'])->name('services');
+    Route::get('/services/{service}/regions', [DeliveryLocationController::class, 'regions'])->name('regions');
+    Route::get('/regions/{region}/cities', [DeliveryLocationController::class, 'cities'])->name('cities');
+    Route::get('/cities/{city}/branches', [DeliveryLocationController::class, 'branches'])->name('branches');
+});
 
 Route::middleware(['auth', 'active.user'])->group(function () {
     Route::get('/account/profile', function () {

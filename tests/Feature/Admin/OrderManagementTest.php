@@ -21,6 +21,12 @@ function adminOrderPayload(array $overrides = []): array
         'region' => 'Kyiv region',
         'city' => 'Kyiv',
         'address' => 'Main street 1',
+        'delivery_service_name' => null,
+        'delivery_region_name' => null,
+        'delivery_city_name' => null,
+        'delivery_branch_name' => null,
+        'delivery_branch_address' => null,
+        'delivery_branch_postal_code' => null,
         'comment' => 'Leave at the desk',
         'subtotal' => 1000,
         'total' => 1000,
@@ -37,6 +43,12 @@ it('shows guest checkout snapshot details on the admin order page', function () 
 
     $order = Order::query()->create(adminOrderPayload([
         'email' => 'guest-order@example.test',
+        'delivery_service_name' => 'Nova Poshta',
+        'delivery_region_name' => 'Kyiv region',
+        'delivery_city_name' => 'Kyiv',
+        'delivery_branch_name' => 'Branch 12',
+        'delivery_branch_address' => 'Branch street 12',
+        'delivery_branch_postal_code' => '01012',
     ]));
 
     $this->actingAs($admin)
@@ -49,7 +61,12 @@ it('shows guest checkout snapshot details on the admin order page', function () 
         ->assertSee('Main street 1')
         ->assertSee('Leave at the desk')
         ->assertSee('Customer status:')
-        ->assertSee('guest');
+        ->assertSee('guest')
+        ->assertSee('Delivery')
+        ->assertSee('Nova Poshta')
+        ->assertSee('Branch 12')
+        ->assertSee('Branch street 12')
+        ->assertSee('01012');
 });
 
 it('shows active customer status on the admin order page', function () {
@@ -104,6 +121,23 @@ it('shows blocked customer status on the admin order page and handles missing le
     ]));
 
     expect($legacyOrder->customer_status)->toBe('guest');
+
+    $emptySnapshotOrder = Order::query()->create(adminOrderPayload([
+        'email' => 'empty-delivery@example.test',
+        'delivery_service_name' => null,
+        'delivery_region_name' => null,
+        'delivery_city_name' => null,
+        'delivery_branch_name' => null,
+        'delivery_branch_address' => null,
+        'delivery_branch_postal_code' => null,
+    ]));
+
+    $this->actingAs($admin)
+        ->get(route('admin.orders.edit', $emptySnapshotOrder))
+        ->assertOk()
+        ->assertSee('Delivery')
+        ->assertSee('Service:')
+        ->assertSee('Postal code:');
 });
 
 it('filters the admin orders list by customer when requested', function () {

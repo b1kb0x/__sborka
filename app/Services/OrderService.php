@@ -3,6 +3,10 @@
 namespace App\Services;
 
 use App\Data\CheckoutResult;
+use App\Models\DeliveryBranch;
+use App\Models\DeliveryCity;
+use App\Models\DeliveryRegion;
+use App\Models\DeliveryService;
 use App\Enums\FulfillmentStatus;
 use App\Enums\OrderStatus;
 use App\Enums\UserRole;
@@ -77,6 +81,7 @@ class OrderService
         }
 
         $result = DB::transaction(function () use ($cart, $checkoutData) {
+            $deliverySelection = $this->resolveDeliverySelection($checkoutData);
             $authenticatedUser = Auth::user();
             $accountCreated = false;
             $shouldAuthenticate = false;
@@ -119,6 +124,16 @@ class OrderService
                 'region' => $checkoutData['region'],
                 'city' => $checkoutData['city'],
                 'address' => $checkoutData['address'],
+                'delivery_service_id' => $deliverySelection['service']->id,
+                'delivery_region_id' => $deliverySelection['region']->id,
+                'delivery_city_id' => $deliverySelection['city']->id,
+                'delivery_branch_id' => $deliverySelection['branch']->id,
+                'delivery_service_name' => $deliverySelection['service']->name,
+                'delivery_region_name' => $deliverySelection['region']->name,
+                'delivery_city_name' => $deliverySelection['city']->name,
+                'delivery_branch_name' => $deliverySelection['branch']->name,
+                'delivery_branch_address' => $deliverySelection['branch']->address,
+                'delivery_branch_postal_code' => $deliverySelection['branch']->postal_code,
                 'comment' => Arr::get($checkoutData, 'comment'),
                 'subtotal' => $cart->subtotal,
                 'total' => $cart->subtotal,
@@ -192,6 +207,25 @@ class OrderService
     protected function normalizeEmail(string $email): string
     {
         return Str::lower(trim($email));
+    }
+
+    protected function resolveDeliverySelection(array $checkoutData): array
+    {
+        $service = DeliveryService::query()->find($checkoutData['delivery_service_id'] ?? null);
+        $region = DeliveryRegion::query()->find($checkoutData['delivery_region_id'] ?? null);
+        $city = DeliveryCity::query()->find($checkoutData['delivery_city_id'] ?? null);
+        $branch = DeliveryBranch::query()->find($checkoutData['delivery_branch_id'] ?? null);
+
+        if (! $service || ! $region || ! $city || ! $branch) {
+            throw new DomainException('Selected delivery data is no longer available.');
+        }
+
+        return [
+            'service' => $service,
+            'region' => $region,
+            'city' => $city,
+            'branch' => $branch,
+        ];
     }
 
     protected function splitName(?string $name): array

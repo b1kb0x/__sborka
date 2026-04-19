@@ -53,6 +53,12 @@ function cabinetOrder(User $user, array $attributes = []): Order
         'region' => 'Kyiv region',
         'city' => 'Kyiv',
         'address' => 'Snapshot address 7',
+        'delivery_service_name' => null,
+        'delivery_region_name' => null,
+        'delivery_city_name' => null,
+        'delivery_branch_name' => null,
+        'delivery_branch_address' => null,
+        'delivery_branch_postal_code' => null,
         'comment' => 'Snapshot comment',
         'subtotal' => 998,
         'total' => 998,
@@ -96,6 +102,12 @@ it('customer can open their own order', function () {
         'region' => 'Lviv region',
         'city' => 'Lviv',
         'address' => 'Order address 12',
+        'delivery_service_name' => 'Ukrposhta',
+        'delivery_region_name' => 'Lviv region',
+        'delivery_city_name' => 'Lviv',
+        'delivery_branch_name' => 'Branch 7',
+        'delivery_branch_address' => 'Branch address 7',
+        'delivery_branch_postal_code' => '79007',
         'comment' => 'Handle with care',
     ]);
 
@@ -117,6 +129,11 @@ it('customer can open their own order', function () {
         ->assertSee('Snapshot')
         ->assertSee('Owner')
         ->assertSee('Handle with care')
+        ->assertSee('Delivery')
+        ->assertSee('Ukrposhta')
+        ->assertSee('Branch 7')
+        ->assertSee('Branch address 7')
+        ->assertSee('79007')
         ->assertSee($product->title);
 });
 

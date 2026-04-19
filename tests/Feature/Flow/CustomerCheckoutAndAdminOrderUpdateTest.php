@@ -5,6 +5,10 @@ use App\Enums\OrderStatus;
 use App\Enums\UserRole;
 use App\Enums\UserStatus;
 use App\Models\CartItem;
+use App\Models\DeliveryBranch;
+use App\Models\DeliveryCity;
+use App\Models\DeliveryRegion;
+use App\Models\DeliveryService;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
@@ -13,8 +17,40 @@ use Illuminate\Support\Str;
 
 uses(RefreshDatabase::class);
 
+function flowDeliverySelection(): array
+{
+    $uuid = (string) Str::uuid();
+
+    $service = DeliveryService::query()->create([
+        'name' => 'Flow delivery '.$uuid,
+        'code' => 'flow-'.Str::lower($uuid),
+        'is_active' => true,
+    ]);
+
+    $region = DeliveryRegion::query()->create([
+        'delivery_service_id' => $service->id,
+        'name' => 'Flow region '.$uuid,
+    ]);
+
+    $city = DeliveryCity::query()->create([
+        'delivery_region_id' => $region->id,
+        'name' => 'Flow city '.$uuid,
+    ]);
+
+    $branch = DeliveryBranch::query()->create([
+        'delivery_city_id' => $city->id,
+        'name' => 'Flow branch '.$uuid,
+        'address' => 'Flow address '.$uuid,
+        'postal_code' => '020'.random_int(10, 99),
+        'is_active' => true,
+    ]);
+
+    return compact('service', 'region', 'city', 'branch');
+}
+
 it('allows a customer to log in, checkout, and an admin to update the order', function () {
     $password = 'pass12345';
+    $deliverySelection = flowDeliverySelection();
 
     $customer = User::factory()->create([
         'name' => 'Checkout Customer',
@@ -79,6 +115,10 @@ it('allows a customer to log in, checkout, and an admin to update the order', fu
         'region' => 'Kyiv region',
         'city' => 'Kyiv',
         'address' => 'Flow street 1',
+        'delivery_service_id' => $deliverySelection['service']->id,
+        'delivery_region_id' => $deliverySelection['region']->id,
+        'delivery_city_id' => $deliverySelection['city']->id,
+        'delivery_branch_id' => $deliverySelection['branch']->id,
         'comment' => 'Flow test',
     ])
         ->assertRedirect();

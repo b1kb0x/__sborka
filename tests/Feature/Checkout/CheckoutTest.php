@@ -169,6 +169,18 @@ it('guest can open checkout page when guest checkout is enabled', function () {
         ->assertOk();
 });
 
+it('renders a searchable branch field with a hidden delivery branch input on checkout', function () {
+    $product = checkoutProduct();
+
+    addItemToCart($this, $product);
+
+    $this->get(route('checkout.create'))
+        ->assertOk()
+        ->assertSee('x-model="branchQuery"', false)
+        ->assertSee('type="hidden" name="delivery_branch_id"', false)
+        ->assertSee('onBranchInput()', false);
+});
+
 it('guest is redirected to login when guest checkout is disabled', function () {
     app(SettingsService::class)->set('checkout.guest_checkout_enabled', false);
 
@@ -557,10 +569,13 @@ it('shows delivery validation errors and restores previous delivery selections a
         ->assertOk()
         ->assertSee('The selected region does not belong to the selected delivery service.')
         ->assertSee('Selected delivery')
+        ->assertSee('x-model="branchQuery"', false)
+        ->assertSee('type="hidden" name="delivery_branch_id"', false)
         ->assertSee("selectedService: '{$firstSelection['service']->id}'", false)
         ->assertSee("selectedRegion: '{$secondSelection['region']->id}'", false)
         ->assertSee("selectedCity: '{$secondSelection['city']->id}'", false)
-        ->assertSee("selectedBranch: '{$secondSelection['branch']->id}'", false);
+        ->assertSee("selectedBranch: '{$secondSelection['branch']->id}'", false)
+        ->assertSee('syncBranchQueryFromSelectedBranch()', false);
 
     expect(Order::query()->count())->toBe(0);
 });

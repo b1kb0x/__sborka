@@ -32,7 +32,7 @@
             <p><strong>Region:</strong> {{ $order->region }}</p>
             <p><strong>City:</strong> {{ $order->city }}</p>
             <p><strong>Address:</strong> {{ $order->address }}</p>
-            <p><strong>Comment:</strong> {{ $order->comment ?: '�' }}</p>
+            <p><strong>Comment:</strong> {{ $order->comment ?: '—' }}</p>
         </div>
 
         <form action="{{ route('admin.orders.update', $order) }}" method="POST">

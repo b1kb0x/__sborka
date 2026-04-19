@@ -53,7 +53,7 @@ class CartController extends Controller
 
         return redirect()
             ->route('cart.index')
-            ->with('success', 'РўРѕРІР°СЂ РґРѕР±Р°РІР»РµРЅ РІ РєРѕСЂР·РёРЅСѓ.');
+            ->with('success', 'Товар добавлен в корзину.');
     }
 
     public function updateQty(Request $request, string $rowId): RedirectResponse
@@ -72,7 +72,7 @@ class CartController extends Controller
 
         return redirect()
             ->route('cart.index')
-            ->with('success', 'РљРѕР»РёС‡РµСЃС‚РІРѕ РѕР±РЅРѕРІР»РµРЅРѕ.');
+            ->with('success', 'Количество обновлено.');
     }
 
     public function remove(string $rowId): RedirectResponse
@@ -81,7 +81,7 @@ class CartController extends Controller
 
         return redirect()
             ->route('cart.index')
-            ->with('success', 'РўРѕРІР°СЂ СѓРґР°Р»С‘РЅ РёР· РєРѕСЂР·РёРЅС‹.');
+            ->with('success', 'Товар удалён из корзины.');
     }
 
     public function clear(): RedirectResponse
@@ -90,7 +90,7 @@ class CartController extends Controller
 
         return redirect()
             ->route('cart.index')
-            ->with('success', 'РљРѕСЂР·РёРЅР° РѕС‡РёС‰РµРЅР°.');
+            ->with('success', 'Корзина очищена.');
     }
 
     public function showCheckout(Request $request): View|RedirectResponse
@@ -144,7 +144,6 @@ class CartController extends Controller
                     'authenticated' => (bool) $result->authenticatedUser,
                 ])
                 ->with('success', 'Order placed.');
-
         } catch (DomainException $e) {
             return redirect()
                 ->route('checkout.create')

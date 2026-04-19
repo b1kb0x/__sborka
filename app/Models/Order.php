@@ -71,4 +71,24 @@ class Order extends Model
         return $user->status?->value
             ?? (is_string($user->status) ? $user->status : 'guest');
     }
+
+    public function deliveryService(): BelongsTo
+    {
+        return $this->belongsTo(DeliveryService::class);
+    }
+
+    public function deliveryRegion(): BelongsTo
+    {
+        return $this->belongsTo(DeliveryRegion::class);
+    }
+
+    public function deliveryCity(): BelongsTo
+    {
+        return $this->belongsTo(DeliveryCity::class);
+    }
+
+    public function deliveryBranch(): BelongsTo
+    {
+        return $this->belongsTo(DeliveryBranch::class);
+    }
 }

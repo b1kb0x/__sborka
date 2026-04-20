@@ -30,12 +30,12 @@
 
         <div style="margin-bottom:20px; padding:15px; border:1px solid #ddd;">
             <h2>Delivery</h2>
-            <p><strong>Service:</strong> {{ $order->delivery_service_name ?: 'вЂ”' }}</p>
-            <p><strong>Region:</strong> {{ $order->delivery_region_name ?: 'вЂ”' }}</p>
-            <p><strong>City:</strong> {{ $order->delivery_city_name ?: 'вЂ”' }}</p>
-            <p><strong>Branch:</strong> {{ $order->delivery_branch_name ?: 'вЂ”' }}</p>
-            <p><strong>Address:</strong> {{ $order->delivery_branch_address ?: 'вЂ”' }}</p>
-            <p><strong>Postal code:</strong> {{ $order->delivery_branch_postal_code ?: 'вЂ”' }}</p>
+            <p><strong>Service:</strong> {{ $order->delivery_service_name ?: '—' }}</p>
+            <p><strong>Region:</strong> {{ $order->delivery_region_name ?: '—' }}</p>
+            <p><strong>City:</strong> {{ $order->delivery_city_name ?: '—' }}</p>
+            <p><strong>Branch:</strong> {{ $order->delivery_branch_name ?: '—' }}</p>
+            <p><strong>Address:</strong> {{ $order->delivery_branch_address ?: '—' }}</p>
+            <p><strong>Postal code:</strong> {{ $order->delivery_branch_postal_code ?: '—' }}</p>
         </div>
 
         <h2>Items</h2>

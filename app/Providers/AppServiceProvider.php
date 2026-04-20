@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Observers\ProductObserver;
 use App\Repositories\Contracts\CartRepository;
 use App\Repositories\HybridCartRepository;
+use App\Services\CartService;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use App\Enums\OrderStatus;
@@ -35,6 +36,11 @@ class AppServiceProvider extends ServiceProvider
                 ->count();
 
             $view->with('newOrdersCount', $newOrdersCount);
+        });
+        View::composer('components.nav', function ($view) {
+            $cartCount = app(CartService::class)->count();
+
+            $view->with('cartCount', $cartCount);
         });
     }
 }

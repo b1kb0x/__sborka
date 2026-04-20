@@ -320,4 +320,9 @@ class CartService
     {
         return empty($this->validateForCheckout());
     }
+
+    public function count(): int
+    {
+        return collect($this->items())->sum('qty');
+    }
 }
